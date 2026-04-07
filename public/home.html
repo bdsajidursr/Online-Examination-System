@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style.css">
+    <title>Student Dashboard</title>
+
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #f4f7f6;
+        }
+
+        .dashboard-nav {
+            background-color: #335998;
+            color: white;
+            padding: 10px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+            box-sizing: border-box;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 1000;
+        }
+
+        .nav-title {
+            font-weight: bold;
+            font-size: 1.1rem;
+        }
+
+        .nav-right {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .logout-btn {
+            background: #e74c3c;
+            color: white;
+            border: none;
+            padding: 8px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .logout-btn:hover {
+            background: #c0392b;
+        }
+
+        .avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            border: 2px solid white;
+            background: white;
+        }
+
+        .main-container {
+            max-width: 1100px;
+            margin: 90px auto 20px;
+            padding: 20px;
+        }
+    </style>
+</head>
+
+<body class="dashboard-body">
+
+    <nav class="dashboard-nav">
+        <div class="nav-left">
+            <span class="nav-title">Student Dashboard</span>
+        </div>
+
+        <div class="nav-right">
+            <span id="userNameDisplay">Student</span>
+
+            <img
+                class="avatar"
+                alt="Student"
+                src="data:image/svg+xml;utf8,
+                <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'>
+                    <circle cx='50' cy='50' r='50' fill='%23e3f2fd'/>
+                    <circle cx='50' cy='38' r='18' fill='%2390caf9'/>
+                    <path d='M20 85c3-20 54-20 60 0' fill='%2390caf9'/>
+                </svg>"
+            />
+
+            <button class="logout-btn" onclick="logout()">Logout</button>
+        </div>
+    </nav>
+
+    <div class="main-container">
+        <h2 class="welcome-text" id="welcomeText">Welcome</h2>
+
+        <div class="card-grid">
+            <div class="action-card orange" onclick="document.getElementById('examListPanel').scrollIntoView({behavior:'smooth'})">
+                <div class="icon-box">🎓</div>
+                <span>Take Exam</span>
+            </div>
+
+            <div class="action-card sky-blue" onclick="document.getElementById('resultsPanel').scrollIntoView({behavior:'smooth'})">
+                <div class="icon-box">✔️</div>
+                <span>My Results</span>
+            </div>
+
+            <div class="action-card soft-red" onclick="location.href='#schedule'">
+                <div class="icon-box">📅</div>
+                <span>Exam Schedule</span>
+            </div>
+
+            <div class="action-card bright-green" onclick="location.href='#materials'">
+                <div class="icon-box">📖</div>
+                <span>Study Materials</span>
+            </div>
+        </div>
+
+        <div class="panel" id="examListPanel">
+            <div class="panel-header">Upcoming Exams</div>
+            <div class="activity-list" id="examList">
+                <p style="padding:20px; color:#888;">Loading exams...</p>
+            </div>
+        </div>
+
+        <div class="panel" id="resultsPanel">
+            <div class="panel-header">Recent Results</div>
+            <div class="activity-list" id="resultsList">
+                <p style="padding:20px; color:#888;">Loading results...</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const userName = localStorage.getItem('userName') || "Student";
+
+        document.getElementById('userNameDisplay').innerText = userName;
+        document.getElementById('welcomeText').innerText = "Welcome, " + userName;
+
+        function logout() {
+            if (confirm("Are you sure you want to logout?")) {
+                localStorage.clear();
+                window.location.href = 'index.html';
+            }
+        }
+
+        async function loadExams() {
+            try {
+                const res = await fetch('/api/get-exams');
+                const exams = await res.json();
+                const examList = document.getElementById('examList');
+
+                if (exams.length > 0) {
+                    examList.innerHTML = '';
+                    exams.forEach(exam => {
+                        examList.innerHTML += `
+                            <div class="activity-item-row">
+                                <div class="activity-info">
+                                    <span class="activity-icon">📅</span>
+                                    <div>
+                                        <p class="exam-name">${exam.subject} Test</p>
+                                        <p class="exam-meta">Available Now | ${exam.qCount} Questions</p>
+                                    </div>
+                                </div>
+                                <button class="start-btn" onclick="startExam('${exam.subject}')">Start</button>
+                            </div>`;
+                    });
+                }
+            } catch (error) {
+                console.error(error);
+            }
+        }
+
+        async function loadResults() {
+            try {
+                const studentID = localStorage.getItem('studentID');
+                const res = await fetch(`/api/my-results/${studentID}`);
+                const results = await res.json();
+                const resultsList = document.getElementById('resultsList');
+
+                if (results.length > 0) {
+                    resultsList.innerHTML = '';
+                    results.forEach(result => {
+                        const percent = Math.round((result.score / result.total) * 100);
+                        resultsList.innerHTML += `
+                            <div class="activity-item-row">
+                                <div class="activity-info">
+                                    <span class="activity-icon">📊</span>
+                                    <div>
+                                        <p class="exam-name">${result.subject} Quiz</p>
+                                        <p class="exam-meta">Score: ${result.score}/${result.total} | ${percent}%</p>
+                                    </div>
+                                </div>
+                            </div>`;
+                    });
+                }
+            } catch (error) {
+                console.error(error);
+            }
+        }
+
+        function startExam(subject) {
+            localStorage.setItem('selSub', subject);
+            window.location.href = 'student.html';
+        }
+
+        window.onload = () => {
+            loadExams();
+            loadResults();
+        };
+    </script>
+
+</body>
+</html>

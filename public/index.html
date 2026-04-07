@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="style.css">
+    <title>Login | EduQuiz</title>
+</head>
+<body>
+    <div class="login-wrapper">
+        <div class="login-illustration">
+            <div class="brand-text">Online Examination System</div>
+            <img src="3964546.jpg" alt="Exam Illustration" style="width:100%;">
+        </div>
+
+        <div class="login-form-container">
+            <div class="auth-tabs">
+                <button id="tabL" class="active" onclick="toggleAuth('L')">Login</button>
+                <button id="tabR" onclick="toggleAuth('R')">Register</button>
+            </div>
+
+            <h2 id="formHeader">Welcome Back</h2>
+
+            <div id="loginView">
+                <div class="role-grid">
+                    <button id="roleStuL" class="active" onclick="setRole('student', 'L')">Student</button>
+                    <button id="roleAdmL" onclick="setRole('admin', 'L')">Admin</button>
+                </div>
+                <div id="pinGroup" class="input-group" style="display: none;">
+                    <label>Admin Secret PIN</label>
+                    <input type="password" id="adminPin">
+                </div>
+                <div class="input-group"><label>Email</label><input type="email" id="email"></div>
+                <div class="input-group"><label>Password</label><input type="password" id="pass"></div>
+                <button class="btn-login" onclick="doLogin()">Login</button>
+            </div>
+
+            <div id="regView" style="display: none;">
+                <div class="role-grid">
+                    <button id="roleStuR" class="active" onclick="setRole('student', 'R')">Student</button>
+                    <button id="roleAdmR" onclick="setRole('admin', 'R')">Admin</button>
+                </div>
+                <div class="input-group"><label>Full Name</label><input type="text" id="regName"></div>
+                <div class="input-group"><label>ID Number</label><input type="text" id="regSID"></div>
+                <div class="input-group"><label>Email</label><input type="email" id="regEmail"></div>
+                <div class="input-group"><label>Password</label><input type="password" id="regPass"></div>
+                <button class="btn-login" onclick="doRegister()">Register</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let loginRole = 'student';
+        let regRole = 'student';
+
+        function setRole(role, mode) {
+            if(mode === 'L') {
+                loginRole = role;
+                document.getElementById('roleStuL').className = (role === 'student' ? 'active' : '');
+                document.getElementById('roleAdmL').className = (role === 'admin' ? 'active' : '');
+                document.getElementById('pinGroup').style.display = (role === 'admin' ? 'block' : 'none');
+            } else {
+                regRole = role;
+                document.getElementById('roleStuR').className = (role === 'student' ? 'active' : '');
+                document.getElementById('roleAdmR').className = (role === 'admin' ? 'active' : '');
+            }
+        }
+
+        function toggleAuth(mode) {
+            document.getElementById('loginView').style.display = (mode === 'L' ? 'block' : 'none');
+            document.getElementById('regView').style.display = (mode === 'R' ? 'block' : 'none');
+            document.getElementById('tabL').className = (mode === 'L' ? 'active' : '');
+            document.getElementById('tabR').className = (mode === 'R' ? 'active' : '');
+        }
+
+      
+async function doLogin() {
+    const res = await fetch('/api/login', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({
+            email: document.getElementById('email').value,
+            password: document.getElementById('pass').value,
+            role: loginRole,
+            pin: document.getElementById('adminPin').value
+        })
+    });
+
+    const data = await res.json();
+
+    if(data.success) {
+        // ✅ ADD THIS (IMPORTANT FIX)
+        localStorage.setItem('userName', data.name);
+        localStorage.setItem('studentID', data.sid);
+
+        window.location.href = (data.role === 'admin' ? 'admin.html' : 'home.html');
+    } else {
+        alert(data.message);
+    }
+}
+
+
+        async function doRegister() {
+            const res = await fetch('/api/register', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                    name: document.getElementById('regName').value,
+                    sid: document.getElementById('regSID').value,
+                    email: document.getElementById('regEmail').value,
+                    pass: document.getElementById('regPass').value,
+                    role: regRole
+                })
+            });
+            const data = await res.json();
+            if(data.success) { alert("Success!"); toggleAuth('L'); }
+            else alert(data.message);
+        }
+    </script>
+</body>
+</html>

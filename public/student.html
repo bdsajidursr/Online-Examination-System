@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        :root {
+            --primary-blue: lch(41.19% 38.28 280.01);
+            --bg-light: #f4f7f6;
+        }
+
+        body {
+            margin: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-light);
+        }
+
+        .header {
+            background-color: var(--primary-blue);
+            color: white;
+            padding: 15px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .timer-display {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 5px 15px;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+
+        .main-container {
+            max-width: 900px;
+            margin: 40px auto;
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        }
+
+        #qCount { color: var(--primary-blue); font-weight: 600; margin-bottom: 10px; }
+        #qText { font-size: 1.3rem; margin-bottom: 30px; color: #333; font-weight: bold; }
+
+        .option-btn {
+            display: block;
+            width: 100%;
+            text-align: left;
+            padding: 15px 20px;
+            margin-bottom: 12px;
+            border: 1px solid #e0e0e0;
+            border-radius: 6px;
+            background: white;
+            font-size: 1rem;
+            cursor: pointer;
+        }
+
+        .answer-input {
+            width: 100%;
+            padding: 15px;
+            font-size: 1.1rem;
+            border: 2px solid #ddd;
+            border-radius: 6px;
+            outline: none;
+        }
+
+        .action-bar {
+            max-width: 900px;
+            margin: 20px auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .nav-btn {
+            padding: 10px 25px;
+            border-radius: 5px;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .prev-btn { background: #dcdcdc; color: #555; }
+        .blue-btn { background: var(--primary-blue); color: white; }
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <strong id="subTitle">Ongoing Exam</strong>
+    <div>Time Left: <span id="timer" class="timer-display">00:00</span></div>
+</div>
+
+<div class="main-container">
+    <p id="qCount">Question 1</p>
+    <h2 id="qText">Loading...</h2>
+    <div id="options"></div>
+</div>
+
+<div class="action-bar">
+    <button class="nav-btn prev-btn" onclick="prev()">< Previous</button>
+    <div>
+        <button id="next" class="nav-btn blue-btn" onclick="next()" style="display:none;">Next ></button>
+        <button id="submit" class="nav-btn blue-btn" onclick="finish()" style="display:none;">Submit Exam</button>
+    </div>
+</div>
+
+<script>
+let questions = [], current = 0, score = 0, time, clock;
+const sub = localStorage.getItem('selSub');
+
+async function init() {
+    document.getElementById('subTitle').innerText = "Ongoing Exam: " + sub;
+    const res = await fetch(`/api/questions/${sub}`);
+    questions = await res.json();
+    time = questions.length * 60; 
+    startClock();
+    show();
+}
+
+function startClock() {
+    clock = setInterval(() => {
+        time--;
+        let m = Math.floor(time/60), s = time%60;
+        document.getElementById('timer').innerText = `${m}:${s<10?'0'+s:s}`;
+        if(time <= 0) finish();
+    }, 1000);
+}
+
+function show() {
+    const q = questions[current];
+    document.getElementById('qCount').innerText = `Question ${current + 1} of ${questions.length}`;
+    document.getElementById('qText').innerText = q.question_text;
+    
+    const optDiv = document.getElementById('options');
+    optDiv.innerHTML = '';
+
+    if (q.type === 'general') {
+        const input = document.createElement('input');
+        input.type = 'text';
+        input.className = 'answer-input';
+        input.id = 'generalAnswer';
+        optDiv.appendChild(input);
+
+        input.oninput = () => {
+            const isLast = current === questions.length - 1;
+            document.getElementById('next').style.display = isLast ? 'none' : 'block';
+            document.getElementById('submit').style.display = isLast ? 'block' : 'none';
+        };
+
+    } else {
+        ['a','b','c','d'].forEach(letter => {
+            const optText = q[`option_${letter}`];
+            if(optText) {
+                const btn = document.createElement('button');
+                btn.className = 'option-btn';
+                btn.innerText = `${letter.toUpperCase()}. ${optText}`;
+                btn.onclick = () => check(letter.toUpperCase(), btn);
+                optDiv.appendChild(btn);
+            }
+        });
+
+        document.getElementById('next').style.display = 'none';
+        document.getElementById('submit').style.display = 'none';
+    }
+}
+
+function check(choice, btn) {
+    const q = questions[current];
+    const allBtns = document.querySelectorAll('.option-btn');
+    allBtns.forEach(b => b.style.borderColor = "#e0e0e0");
+    
+    if(choice === q.correct_option) { 
+        btn.style.backgroundColor = "#d4edda";
+        btn.style.borderColor = "#28a745";
+        score++;
+    } else {
+        btn.style.backgroundColor = "#f8d7da";
+        btn.style.borderColor = "#dc3545";
+    }
+
+    const isLast = current === questions.length - 1;
+    document.getElementById('next').style.display = isLast ? 'none' : 'block';
+    document.getElementById('submit').style.display = isLast ? 'block' : 'none';
+}
+
+function next() { 
+    const q = questions[current];
+    if(q.type === 'general') {
+        const userAns = document.getElementById('generalAnswer').value.trim();
+        if(userAns.toLowerCase() === q.correct_option.toLowerCase()) {
+            score++;
+        }
+    }
+    current++; 
+    show(); 
+}
+
+function prev() { if(current > 0) { current--; show(); } }
+
+
+// ✅ FIXED FUNCTION (IMPORTANT)
+async function finish() {
+    const q = questions[current];
+
+    if(q.type === 'general') {
+        const userAns = document.getElementById('generalAnswer').value.trim();
+        if(userAns.toLowerCase() === q.correct_option.toLowerCase()) {
+            score++;
+        }
+    }
+
+    clearInterval(clock);
+
+    await fetch('/api/save-result', {
+        method: 'POST',
+        headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({ 
+            student_name: localStorage.getItem('userName'),
+            student_id: localStorage.getItem('studentID'),
+            score: score,
+            total: questions.length,
+            subject: sub
+        })
+    });
+
+    alert("Exam Finished!");
+    window.location.href='home.html';
+}
+
+init();
+</script>
+
+</body>
+</html>
