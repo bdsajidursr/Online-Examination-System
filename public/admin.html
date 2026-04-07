@@ -6,7 +6,7 @@
     <title>Admin Dashboard</title>
 
     <style>
-        /* ===== KEEP YOUR ORIGINAL STYLE ===== */
+     
         .dashboard-nav {
             position: fixed !important;
             top: 0 !important;
@@ -61,7 +61,7 @@
             margin-left: 10px;
         }
 
-        /* ===== NEW UI UPGRADE ===== */
+        /*  NEW UI UPGRADE  */
         .action-card {
             transition: 0.3s ease;
         }
@@ -157,7 +157,7 @@ const adminName = localStorage.getItem('userName') || "Admin";
 document.querySelector('.admin-name').innerText = adminName;
 document.getElementById('welcomeText').innerText = "Welcome, " + adminName;
 
-/* ===== LIVE STATS FIX ===== */
+/*LIVE STATS FIX */
 async function loadStats(){
     try{
         const res = await fetch('/api/admin-stats');
@@ -170,22 +170,22 @@ async function loadStats(){
     }catch(e){console.log(e);}
 }
 
-/* ===== LOAD RESULTS ===== */
+/* LOAD RESULTS */
 async function loadAllResults() {
     try {
-        // ✅ ADDED: cache breaker
+        // cache breaker
         const res = await fetch('/api/get-all-results?nocache=' + Date.now());
 
         const results = await res.json();
 
-        // ✅ ADDED: debug
+        // debug
         console.log("Latest Results:", results);
 
         const container = document.getElementById('adminResultsList');
 
         container.innerHTML = '';
 
-        // ✅ ADDED: empty check
+        // empty check
         if(results.length === 0){
             container.innerHTML = '<p style="padding:20px; color:#888;">No results found.</p>';
             return;
@@ -218,14 +218,13 @@ async function manualUpdate(id) {
     alert("Updated!");
 }
 
-/* ===== AUTO REFRESH ===== */
+/* AUTO REFRESH */
 setInterval(loadAllResults, 5000);
 
 window.onload = () => {
     loadStats();
     loadAllResults();
 };
-// ===== ADD ONLY THIS BLOCK =====
 
 function openModal() {
     document.getElementById('qModal').style.display = 'flex';
@@ -284,10 +283,9 @@ async function saveQuestion() {
     }
 }
 
-// initialize type UI
 toggleQuestionType();
 </script>
-<!-- ===== ADD THIS (Question Modal) ===== -->
+<!--Question Modal-->
 <div id="qModal" class="qb-modal">
     <div class="qb-modal-box">
 
@@ -320,6 +318,16 @@ toggleQuestionType();
         <div id="generalField" style="display:none;">
             <input type="text" id="correctGeneral" placeholder="Correct Answer" class="qb-input">
         </div>
+
+
+<!-- Exam Duration -->
+<input type="number" id="examTime" placeholder="Time in minutes (e.g. 30)" class="qb-input">
+
+<!-- Start Time -->
+<input type="datetime-local" id="scheduleStart" class="qb-input">
+
+<!--End Time -->
+<input type="datetime-local" id="scheduleEnd" class="qb-input">
 
         <button class="qb-save" onclick="saveQuestion()">Save to Database</button>
         <button class="qb-cancel" onclick="closeModal()">Cancel</button>
