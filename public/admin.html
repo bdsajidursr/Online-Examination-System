@@ -6,7 +6,7 @@
     <title>Admin Dashboard</title>
 
     <style>
-     
+        /* ===== KEEP YOUR ORIGINAL STYLE ===== */
         .dashboard-nav {
             position: fixed !important;
             top: 0 !important;
@@ -61,7 +61,7 @@
             margin-left: 10px;
         }
 
-        /*  NEW UI UPGRADE  */
+        /* ===== NEW UI UPGRADE ===== */
         .action-card {
             transition: 0.3s ease;
         }
@@ -70,9 +70,7 @@
             box-shadow: 0 10px 25px rgba(0,0,0,0.15);
         }
 
-        .panel {
-            animation: fadeInUp 0.6s ease;
-        }
+    
 
         @keyframes fadeInUp {
             from {opacity:0; transform:translateY(20px);}
@@ -94,6 +92,13 @@
             background: #f7f9fc;
             transform: scale(1.01);
         }
+        .panel {
+    background: #fff;
+    padding: 15px;
+    margin: 15px 0;
+    border-radius: 10px;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.08);
+}
     </style>
 </head>
 
@@ -126,13 +131,36 @@
     <h2 class="welcome-text" id="welcomeText">Welcome</h2>
 
     <div class="card-grid">
-        <div class="action-card blue"><div class="icon-box">📋</div><span>Manage Exams</span></div>
-        <div class="action-card red" onclick="openModal()"><div class="icon-box">📑</div><span>Question Bank</span></div>
-        <div class="action-card sky"><div class="icon-box">👥</div><span>Students Management</span></div>
-        <div class="action-card green" onclick="document.getElementById('adminResultsPanel').scrollIntoView({behavior:'smooth'})">
-            <div class="icon-box">📈</div><span>Results & Reports</span>
-        </div>
+        <div class="action-card blue" onclick="location.href='manage-exams.html'"><div class="icon-box">📋</div><span>Manage Exams</span></div>
+        <div class="action-card red" onclick="location.href='question-bank.html'"><div class="icon-box">📑</div><span>Question Bank</span></div>
+        <div class="action-card sky" onclick="location.href='student-management.html'"><div class="icon-box">👥</div><span>Students Management</span></div>
+        <div class="action-card green" onclick="location.href='result_statistics.html'"><div class="icon-box">📊</div><span>Results & Statistics</span></div>
     </div>
+<!-- ===== SECTION SUMMARIES ===== -->
+
+<!-- Manage Exams Summary -->
+<div class="panel">
+    <div class="panel-header">📋 Manage Exams Summary</div>
+    <div id="examSummary">Loading...</div>
+</div>
+
+<!-- Question Bank Summary -->
+<div class="panel">
+    <div class="panel-header">📑 Question Bank Summary</div>
+    <div id="questionSummary">Loading...</div>
+</div>
+
+<!-- Students Summary -->
+<div class="panel">
+    <div class="panel-header">👥 Students Summary</div>
+    <div id="studentSummary">Loading...</div>
+</div>
+
+<!-- Results Summary -->
+<div class="panel">
+    <div class="panel-header">📊 Results Summary</div>
+    <div id="resultSummary">Loading...</div>
+</div>
 
     <div class="panel">
         <div class="panel-header">Statistics</div>
@@ -144,7 +172,7 @@
     </div>
 
     <div class="panel" id="adminResultsPanel">
-        <div class="panel-header">Master Student Results (Manual Edit)</div>
+        <div class="panel-header">Student Results (Manual Edit)</div>
         <div class="activity-list" id="adminResultsList">
             <p style="padding:20px; color:#888;">Loading all student scores...</p>
         </div>
@@ -154,10 +182,12 @@
 
 <script>
 const adminName = localStorage.getItem('userName') || "Admin";
-document.querySelector('.admin-name').innerText = adminName;
-document.getElementById('welcomeText').innerText = "Welcome, " + adminName;
+const adminEl = document.querySelector('.admin-name');
+if(adminEl) adminEl.innerText = adminName;
+const welcome = document.getElementById('welcomeText');
+if(welcome) welcome.innerText = "Welcome, " + adminName;
 
-/*LIVE STATS FIX */
+/* ===== LIVE STATS FIX ===== */
 async function loadStats(){
     try{
         const res = await fetch('/api/admin-stats');
@@ -170,7 +200,7 @@ async function loadStats(){
     }catch(e){console.log(e);}
 }
 
-/* LOAD RESULTS */
+/* ===== LOAD RESULTS ===== */
 async function loadAllResults() {
     try {
         // cache breaker
@@ -178,7 +208,7 @@ async function loadAllResults() {
 
         const results = await res.json();
 
-        // debug
+        //debug
         console.log("Latest Results:", results);
 
         const container = document.getElementById('adminResultsList');
@@ -186,7 +216,7 @@ async function loadAllResults() {
         container.innerHTML = '';
 
         // empty check
-        if(results.length === 0){
+        if(!Array.isArray(results) || results.length === 0){
             container.innerHTML = '<p style="padding:20px; color:#888;">No results found.</p>';
             return;
         }
@@ -210,21 +240,30 @@ async function loadAllResults() {
 
 async function manualUpdate(id) {
     const newScore = document.getElementById(`score-${id}`).value;
-    await fetch('/api/update-score', {
+
+    const res = await fetch('/api/update-score', {
         method: 'PUT',
         headers: {'Content-Type': 'application/json'},
         body: JSON.stringify({ id, score: newScore })
     });
-    alert("Updated!");
-}
 
-/* AUTO REFRESH */
+    const data = await res.json();
+
+    if (data.success) {
+        alert("Updated!");
+    } else {
+        alert("Update failed!");
+    }
+}
+/* ===== AUTO REFRESH ===== */
 setInterval(loadAllResults, 5000);
 
 window.onload = () => {
     loadStats();
     loadAllResults();
+    loadDashboardSummary();  
 };
+// ===== ADD ONLY THIS BLOCK =====
 
 function openModal() {
     document.getElementById('qModal').style.display = 'flex';
@@ -252,6 +291,9 @@ async function saveQuestion() {
         question_text: document.getElementById('question').value,
         type: type
     };
+    data.start_time = document.getElementById('scheduleStart').value;
+data.end_time = document.getElementById('scheduleEnd').value;
+data.timer_minutes = document.getElementById('examTime').value;
 
     if (type === 'mcq') {
         data.a = document.getElementById('optA').value;
@@ -267,7 +309,7 @@ async function saveQuestion() {
         data.correct = document.getElementById('correctGeneral').value;
     }
 
-    const res = await fetch('/api/questions', {
+    const res = await fetch('/api/questions-full', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data)
@@ -283,9 +325,64 @@ async function saveQuestion() {
     }
 }
 
-toggleQuestionType();
+// initialize type UI
+window.addEventListener("DOMContentLoaded", toggleQuestionType);
+/* ===== DASHBOARD SUMMARIES ===== */
+
+async function loadDashboardSummary(){
+    try{
+
+        // ===== EXAMS =====
+        const examRes = await fetch('/api/get-exams');
+        const exams = await examRes.json();
+
+        document.getElementById('examSummary').innerHTML =
+            "Total Exams: <strong>" + exams.length + "</strong><br>" +
+            exams.slice(0,3).map(e => "• " + e.subject).join("<br>");
+
+
+        // ===== QUESTIONS =====
+        const qRes = await fetch('/api/qb-subjects');
+        const questions = await qRes.json();
+
+document.getElementById('questionSummary').innerHTML =
+    "Subjects: <strong>" + questions.length + "</strong><br>" +
+    questions.slice(0,3).map(q => "• " + q.subject + " (" + q.count + ")").join("<br>");
+
+
+        // ===== STUDENTS =====
+        try{
+            const sRes = await fetch('/api/students');
+            const students = await sRes.json();
+
+            document.getElementById('studentSummary').innerHTML =
+                "Total Students: <strong>" + students.length + "</strong><br>" +
+                students.slice(0,3).map(s => "• " + s.name).join("<br>");
+        }catch(e){
+            document.getElementById('studentSummary').innerHTML = "❌ Failed to load students";
+        }
+
+
+        // ===== RESULTS =====
+        try{
+            const rRes = await fetch('/api/get-all-results');
+            const results = await rRes.json();
+
+            document.getElementById('resultSummary').innerHTML =
+                "Total Results: <strong>" + results.length + "</strong><br>" +
+                results.slice(0,3).map(r =>
+                    "• " + r.student_name + " (" + r.score + ")"
+                ).join("<br>");
+        }catch(e){
+            document.getElementById('resultSummary').innerHTML = "❌ Failed to load results";
+        }
+
+    }catch(e){
+        console.log("Summary error:", e);
+    }
+}
 </script>
-<!--Question Modal-->
+<!-- ===== ADD THIS (Question Modal) ===== -->
 <div id="qModal" class="qb-modal">
     <div class="qb-modal-box">
 
@@ -326,7 +423,7 @@ toggleQuestionType();
 <!-- Start Time -->
 <input type="datetime-local" id="scheduleStart" class="qb-input">
 
-<!--End Time -->
+<!-- End Time -->
 <input type="datetime-local" id="scheduleEnd" class="qb-input">
 
         <button class="qb-save" onclick="saveQuestion()">Save to Database</button>
