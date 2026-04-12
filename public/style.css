@@ -302,3 +302,33 @@ body { font-family: 'Segoe UI', sans-serif; background: var(--bg-gray); margin: 
     cursor: pointer;
     width: 100%;
 }
+/* ===== PAGE HEADER (UNIFIED TITLE BAR) ===== */
+.page-header {
+    padding: 18px 25px;
+    border-radius: 14px;
+    color: white;
+    font-size: 20px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 20px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+}
+
+/* THEMES */
+.header-student {
+    background: linear-gradient(90deg, #4e73df, #224abe);
+}
+
+.header-exam {
+    background: linear-gradient(90deg, #1cc88a, #17a673);
+}
+
+.header-question {
+    background: linear-gradient(90deg, #6f42c1, #4e2a84);
+}
+
+.header-result {
+    background: linear-gradient(90deg, #e74a3b, #c0392b);
+}

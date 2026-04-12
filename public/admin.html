@@ -203,19 +203,19 @@ async function loadStats(){
 /* ===== LOAD RESULTS ===== */
 async function loadAllResults() {
     try {
-        // cache breaker
+        // ✅ ADDED: cache breaker
         const res = await fetch('/api/get-all-results?nocache=' + Date.now());
 
         const results = await res.json();
 
-        //debug
+        // ✅ ADDED: debug
         console.log("Latest Results:", results);
 
         const container = document.getElementById('adminResultsList');
 
         container.innerHTML = '';
 
-        // empty check
+        // ✅ ADDED: empty check
         if(!Array.isArray(results) || results.length === 0){
             container.innerHTML = '<p style="padding:20px; color:#888;">No results found.</p>';
             return;
