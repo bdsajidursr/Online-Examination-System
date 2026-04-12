@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Student Management</title>
+
+<style>
+body { margin:0; font-family:Segoe UI; background:#f4f7fb; }
+
+.container {
+    padding:20px;
+}
+
+/* HEADER BAR */
+.title {
+    padding:15px 20px;
+    border-radius:12px;
+    font-size:20px;
+    font-weight:bold;
+    color:white;
+    background: linear-gradient(135deg,#3b82f6);
+    margin-bottom:20px;
+}
+
+/* TABLE */
+.card {
+    background:white;
+    padding:20px;
+    border-radius:12px;
+    box-shadow:0 4px 10px rgba(0,0,0,.05);
+}
+
+table {
+    width:100%;
+    border-collapse:collapse;
+}
+
+th, td {
+    padding:10px;
+    border-bottom:1px solid #eee;
+    text-align:left;
+}
+
+th {
+    background:#f1f5f9;
+}
+
+/* BUTTON */
+.btn {
+    padding:8px 12px;
+    border:none;
+    border-radius:6px;
+    background:#22c55e;
+    color:white;
+    cursor:pointer;
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<div class="title">👥 Student Management</div>
+
+<div class="card">
+    <table>
+        <thead>
+            <tr>
+                <th>Select</th>
+                <th>Student ID</th>
+                <th>Name</th>
+                <th>Exam</th>
+                <th>Score</th>
+            </tr>
+        </thead>
+        <tbody id="studentTable"></tbody>
+    </table>
+
+    <br>
+    <button class="btn" onclick="assignMarks()">Assign Marks</button>
+</div>
+
+</div>
+
+<script>
+let students = [];
+
+async function loadStudents(){
+    const res = await fetch('/api/get-all-results');
+    const data = await res.json();
+
+    students = data;
+
+    const table = document.getElementById('studentTable');
+    table.innerHTML = '';
+
+    data.forEach(s=>{
+        table.innerHTML += `
+        <tr>
+            <td><input type="checkbox" value="${s.id}"></td>
+            <td>${s.student_id || s.id}</td>
+            <td>${s.student_name}</td>
+            <td>${s.subject}</td>
+            <td>
+                <input type="number" id="score-${s.id}" value="${s.score}" style="width:60px;">
+            </td>
+        </tr>`;
+    });
+}
+
+async function assignMarks(){
+    const selected = document.querySelectorAll('input[type=checkbox]:checked');
+
+    for(const box of selected){
+        const id = box.value;
+        const score = document.getElementById('score-'+id).value;
+
+        await fetch('/api/update-score',{
+            method:'PUT',
+            headers:{'Content-Type':'application/json'},
+            body:JSON.stringify({id, score})
+        });
+    }
+
+    alert("Marks updated!");
+    loadStudents();
+}
+
+loadStudents();
+</script>
+
+</body>
+</html>
