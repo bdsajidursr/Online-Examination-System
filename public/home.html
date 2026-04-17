@@ -1,218 +1,379 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="style.css">
-    <title>Student Dashboard</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Student Dashboard — EduQuiz</title>
+  <style>
+    :root {
+      --blue: #3b82f6;
+      --green: #22c55e;
+      --orange: #f97316;
+      --red: #ef4444;
+      --purple: #a855f7;
+      --bg: #f1f5f9;
+      --surface: #ffffff;
+      --border: #e2e8f0;
+      --text: #0f172a;
+      --text-muted: #64748b;
+      --text-dim: #94a3b8;
+      --nav-bg: #1e293b;
+      --radius: 12px;
+      --shadow: 0 4px 16px rgba(0,0,0,.07);
+    }
 
-    <style>
-        body {
-            margin: 0;
-            padding: 0;
-            background-color: #f4f7f6;
-        }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
 
-        .dashboard-nav {
-            background-color: #335998;
-            color: white;
-            padding: 10px 30px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            width: 100%;
-            box-sizing: border-box;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            position: fixed;
-            top: 0;
-            left: 0;
-            z-index: 1000;
-        }
+    body {
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
 
-        .nav-title {
-            font-weight: bold;
-            font-size: 1.1rem;
-        }
+    /* ── NAV ── */
+    .topnav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
+      background: var(--nav-bg);
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 28px; height: 60px;
+      box-shadow: 0 2px 12px rgba(0,0,0,.18);
+    }
+    .topnav-brand {
+      display: flex; align-items: center; gap: 10px;
+      text-decoration: none; color: white;
+    }
+    .brand-icon { font-size: 1.4rem; }
+    .brand-name {
+      font-size: 1.15rem; font-weight: 700; letter-spacing: -.3px;
+    }
+    .brand-name span { color: var(--blue); }
+    .topnav-right { display: flex; align-items: center; gap: 14px; }
+    .nav-user { display: flex; align-items: center; gap: 10px; }
+    .nav-avatar {
+      width: 34px; height: 34px; border-radius: 50%;
+      background: var(--blue); color: white;
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 700; font-size: .9rem;
+    }
+    .nav-username { color: #cbd5e1; font-size: .9rem; font-weight: 500; }
+    .btn-logout {
+      background: var(--red); color: white; border: none;
+      padding: 7px 18px; border-radius: 8px; cursor: pointer;
+      font-weight: 600; font-size: .85rem; transition: .2s;
+    }
+    .btn-logout:hover { background: #dc2626; }
 
-        .nav-right {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
+    /* ── LAYOUT ── */
+    .page-wrapper { padding-top: 76px; }
+    .container { max-width: 1080px; margin: 0 auto; padding: 24px 20px 40px; }
 
-        .logout-btn {
-            background: #e74c3c;
-            color: white;
-            border: none;
-            padding: 8px 20px;
-            border-radius: 4px;
-            cursor: pointer;
-            font-weight: 600;
-        }
+    .page-title-row { margin-bottom: 28px; }
+    .page-title { font-size: 1.7rem; font-weight: 800; color: var(--text); }
+    .page-title span { color: var(--blue); }
+    .page-subtitle { color: var(--text-muted); margin-top: 4px; font-size: .95rem; }
 
-        .logout-btn:hover {
-            background: #c0392b;
-        }
+    /* ── ACTION CARDS ── */
+    .action-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+      margin-bottom: 28px;
+    }
+    @media (max-width: 720px) { .action-grid { grid-template-columns: repeat(2, 1fr); } }
 
-        .avatar {
-            width: 36px;
-            height: 36px;
-            border-radius: 50%;
-            border: 2px solid white;
-            background: white;
-        }
+    .action-card {
+      background: var(--surface);
+      border-radius: var(--radius);
+      padding: 22px 18px;
+      cursor: pointer;
+      border: 1.5px solid var(--border);
+      transition: transform .2s, box-shadow .2s;
+      box-shadow: var(--shadow);
+    }
+    .action-card:hover { transform: translateY(-4px); box-shadow: 0 8px 24px rgba(0,0,0,.1); }
+    .action-emoji { font-size: 1.8rem; margin-bottom: 10px; }
+    .action-title { font-weight: 700; font-size: .95rem; color: var(--text); }
+    .action-desc { font-size: .8rem; color: var(--text-muted); margin: 4px 0 10px; }
+    .action-arrow { font-size: .82rem; font-weight: 700; color: var(--blue); }
 
-        .main-container {
-            max-width: 1100px;
-            margin: 90px auto 20px;
-            padding: 20px;
-        }
-    </style>
+    .orange-card { border-top: 3px solid var(--orange); }
+    .orange-card .action-arrow { color: var(--orange); }
+    .blue-card { border-top: 3px solid var(--blue); }
+    .blue-card .action-arrow { color: var(--blue); }
+    .green-card { border-top: 3px solid var(--green); }
+    .green-card .action-arrow { color: var(--green); }
+    .action-card:not(.orange-card):not(.blue-card):not(.green-card) { border-top: 3px solid var(--purple); }
+    .action-card:not(.orange-card):not(.blue-card):not(.green-card) .action-arrow { color: var(--purple); }
+
+    /* ── PANEL ── */
+    .panel {
+      background: var(--surface);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      border: 1px solid var(--border);
+      margin-bottom: 24px;
+      overflow: hidden;
+    }
+    .panel-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--border);
+      font-weight: 700; font-size: .95rem;
+    }
+    .panel-header-left { display: flex; align-items: center; gap: 8px; }
+
+    /* ── ACTIVITY ROWS ── */
+    .activity-row {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 14px 20px;
+      border-bottom: 1px solid var(--border);
+      transition: background .15s;
+    }
+    .activity-row:last-child { border-bottom: none; }
+    .activity-row:hover { background: #f8faff; }
+    .activity-left { display: flex; align-items: center; gap: 14px; }
+    .activity-icon-box {
+      width: 40px; height: 40px; border-radius: 10px;
+      background: #f1f5f9;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.2rem;
+    }
+    .activity-name { font-weight: 600; font-size: .9rem; color: var(--text); }
+    .activity-meta { font-size: .78rem; color: var(--text-muted); margin-top: 2px; }
+
+    /* ── BUTTONS ── */
+    .btn {
+      border: none; cursor: pointer; font-weight: 600;
+      border-radius: 8px; transition: .2s;
+    }
+    .btn-sm { padding: 7px 16px; font-size: .82rem; }
+    .btn-success { background: var(--green); color: white; }
+    .btn-success:hover { background: #16a34a; }
+
+    /* ── BADGES ── */
+    .badge {
+      display: inline-block; padding: 3px 10px;
+      border-radius: 20px; font-size: .78rem; font-weight: 700;
+    }
+    .badge-green { background: #dcfce7; color: #166534; }
+    .badge-orange { background: #ffedd5; color: #9a3412; }
+    .badge-red { background: #fee2e2; color: #991b1b; }
+
+    /* ── EMPTY STATE ── */
+    .empty-state {
+      text-align: center; padding: 40px 20px;
+      color: var(--text-dim);
+    }
+    .empty-icon { font-size: 2rem; margin-bottom: 8px; }
+    .empty-text { font-size: .9rem; }
+
+    /* ── TOAST ── */
+    #toast {
+      position: fixed; bottom: 24px; right: 24px; z-index: 9999;
+      background: var(--nav-bg); color: white;
+      padding: 12px 20px; border-radius: 10px;
+      font-size: .88rem; font-weight: 500;
+      opacity: 0; pointer-events: none;
+      transform: translateY(10px);
+      transition: .3s;
+    }
+    #toast.show { opacity: 1; transform: translateY(0); }
+    #toast.error { background: var(--red); }
+
+    /* ── FADE UP ── */
+    .fade-up {
+      animation: fadeUp .4s ease both;
+    }
+    .fade-up:nth-child(2) { animation-delay: .05s; }
+    .fade-up:nth-child(3) { animation-delay: .1s; }
+    .fade-up:nth-child(4) { animation-delay: .15s; }
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(16px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+  </style>
 </head>
+<body>
 
-<body class="dashboard-body">
+<nav class="topnav">
+  <a href="#" class="topnav-brand">
+    <div class="brand-icon">📚</div>
+    <span class="brand-name">Edu<span>Quiz</span></span>
+  </a>
+  <div class="topnav-right">
+    <div class="nav-user">
+      <div class="nav-avatar" id="avatarInit">S</div>
+      <span class="nav-username" id="userNameDisplay">Student</span>
+    </div>
+    <button class="btn-logout" onclick="logout()">Logout</button>
+  </div>
+</nav>
 
-    <nav class="dashboard-nav">
-        <div class="nav-left">
-            <span class="nav-title">Student Dashboard</span>
-        </div>
+<div class="page-wrapper">
+  <div class="container">
 
-        <div class="nav-right">
-            <span id="userNameDisplay">Student</span>
-
-            <img
-                class="avatar"
-                alt="Student"
-                src="data:image/svg+xml;utf8,
-                <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'>
-                    <circle cx='50' cy='50' r='50' fill='%23e3f2fd'/>
-                    <circle cx='50' cy='38' r='18' fill='%2390caf9'/>
-                    <path d='M20 85c3-20 54-20 60 0' fill='%2390caf9'/>
-                </svg>"
-            />
-
-            <button class="logout-btn" onclick="logout()">Logout</button>
-        </div>
-    </nav>
-
-    <div class="main-container">
-        <h2 class="welcome-text" id="welcomeText">Welcome</h2>
-
-        <div class="card-grid">
-            <div class="action-card orange" onclick="document.getElementById('examListPanel').scrollIntoView({behavior:'smooth'})">
-                <div class="icon-box">🎓</div>
-                <span>Take Exam</span>
-            </div>
-
-            <div class="action-card sky-blue" onclick="document.getElementById('resultsPanel').scrollIntoView({behavior:'smooth'})">
-                <div class="icon-box">✔️</div>
-                <span>My Results</span>
-            </div>
-
-            <div class="action-card soft-red" onclick="location.href='#schedule'">
-                <div class="icon-box">📅</div>
-                <span>Exam Schedule</span>
-            </div>
-
-            <div class="action-card bright-green" onclick="location.href='#materials'">
-                <div class="icon-box">📖</div>
-                <span>Study Materials</span>
-            </div>
-        </div>
-
-        <div class="panel" id="examListPanel">
-            <div class="panel-header">Upcoming Exams</div>
-            <div class="activity-list" id="examList">
-                <p style="padding:20px; color:#888;">Loading exams...</p>
-            </div>
-        </div>
-
-        <div class="panel" id="resultsPanel">
-            <div class="panel-header">Recent Results</div>
-            <div class="activity-list" id="resultsList">
-                <p style="padding:20px; color:#888;">Loading results...</p>
-            </div>
-        </div>
+    <div class="page-title-row">
+      <div>
+        <div class="page-title" id="welcomeText">Welcome back 👋</div>
+        <div class="page-subtitle">Ready to take your next exam?</div>
+      </div>
     </div>
 
-    <script>
-        const userName = localStorage.getItem('userName') || "Student";
+    <!-- QUICK LINKS -->
+    <div class="action-grid">
+      <div class="action-card orange-card fade-up" onclick="document.getElementById('examPanel').scrollIntoView({behavior:'smooth'})">
+        <div class="action-emoji">🎓</div>
+        <div class="action-title">Take Exam</div>
+        <div class="action-desc">Browse available exams</div>
+        <div class="action-arrow">Start →</div>
+      </div>
+      <div class="action-card blue-card fade-up" onclick="document.getElementById('resultsPanel').scrollIntoView({behavior:'smooth'})">
+        <div class="action-emoji">✅</div>
+        <div class="action-title">My Results</div>
+        <div class="action-desc">View your scores</div>
+        <div class="action-arrow">View →</div>
+      </div>
+      <div class="action-card fade-up" onclick="location.href='schedule.html'">
+        <div class="action-emoji">📅</div>
+        <div class="action-title">Schedule</div>
+        <div class="action-desc">Upcoming exam times</div>
+        <div class="action-arrow">View →</div>
+      </div>
+      <div class="action-card green-card fade-up" onclick="location.href='materials.html'">
+        <div class="action-emoji">📖</div>
+        <div class="action-title">Study Materials</div>
+        <div class="action-desc">Resources & guides</div>
+        <div class="action-arrow">Open →</div>
+      </div>
+    </div>
 
-        document.getElementById('userNameDisplay').innerText = userName;
-        document.getElementById('welcomeText').innerText = "Welcome, " + userName;
+    <!-- EXAMS PANEL -->
+    <div class="panel" id="examPanel">
+      <div class="panel-header">
+        <div class="panel-header-left">🎓 Available Exams</div>
+        <span class="badge badge-green" id="examCount">0 exams</span>
+      </div>
+      <div id="examList">
+        <div class="empty-state"><div class="empty-icon">⏳</div><div class="empty-text">Loading exams...</div></div>
+      </div>
+    </div>
 
-        function logout() {
-            if (confirm("Are you sure you want to logout?")) {
-                localStorage.clear();
-                window.location.href = 'index.html';
-            }
-        }
+    <!-- RESULTS PANEL -->
+    <div class="panel" id="resultsPanel">
+      <div class="panel-header">
+        <div class="panel-header-left">📊 My Recent Results</div>
+      </div>
+      <div id="resultsList">
+        <div class="empty-state"><div class="empty-icon">⏳</div><div class="empty-text">Loading results...</div></div>
+      </div>
+    </div>
 
-        async function loadExams() {
-            try {
-                const res = await fetch('/api/get-exams');
-                const exams = await res.json();
-                const examList = document.getElementById('examList');
+  </div>
+</div>
 
-                if (exams.length > 0) {
-                    examList.innerHTML = '';
-                    exams.forEach(exam => {
-                        examList.innerHTML += `
-                            <div class="activity-item-row">
-                                <div class="activity-info">
-                                    <span class="activity-icon">📅</span>
-                                    <div>
-                                        <p class="exam-name">${exam.subject} Test</p>
-                                        <p class="exam-meta">Available Now | ${exam.qCount} Questions</p>
-                                    </div>
-                                </div>
-                                <button class="start-btn" onclick="startExam('${exam.subject}')">Start</button>
-                            </div>`;
-                    });
-                }
-            } catch (error) {
-                console.error(error);
-            }
-        }
+<div id="toast"></div>
 
-        async function loadResults() {
-            try {
-                const studentID = localStorage.getItem('studentID');
-                const res = await fetch(`/api/my-results/${studentID}`);
-                const results = await res.json();
-                const resultsList = document.getElementById('resultsList');
+<script>
+  function toast(msg, type = 'success') {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.className = 'show ' + type;
+    setTimeout(() => t.className = '', 3000);
+  }
 
-                if (results.length > 0) {
-                    resultsList.innerHTML = '';
-                    results.forEach(result => {
-                        const percent = Math.round((result.score / result.total) * 100);
-                        resultsList.innerHTML += `
-                            <div class="activity-item-row">
-                                <div class="activity-info">
-                                    <span class="activity-icon">📊</span>
-                                    <div>
-                                        <p class="exam-name">${result.subject} Quiz</p>
-                                        <p class="exam-meta">Score: ${result.score}/${result.total} | ${percent}%</p>
-                                    </div>
-                                </div>
-                            </div>`;
-                    });
-                }
-            } catch (error) {
-                console.error(error);
-            }
-        }
+  // ── Set user info ──
+  const userName = localStorage.getItem('userName') || 'Student';
+  document.getElementById('userNameDisplay').textContent = userName;
+  document.getElementById('avatarInit').textContent = userName.charAt(0).toUpperCase();
+  document.getElementById('welcomeText').textContent = `Welcome back, ${userName} 👋`;
 
-        function startExam(subject) {
-            localStorage.setItem('selSub', subject);
-            window.location.href = 'student.html';
-        }
+  function logout() {
+    if (confirm('Are you sure you want to logout?')) {
+      localStorage.clear();
+      window.location.href = 'index.html';
+    }
+  }
 
-        window.onload = () => {
-            loadExams();
-            loadResults();
-        };
-    </script>
+  // ── Load Exams ──
+  async function loadExams() {
+    try {
+      const res = await fetch('/api/get-exams');
+      const exams = await res.json();
+
+      document.getElementById('examCount').textContent = exams.length + ' exams';
+      const container = document.getElementById('examList');
+
+      if (!exams.length) {
+        container.innerHTML = '<div class="empty-state"><div class="empty-icon">📭</div><div class="empty-text">No exams available right now</div></div>';
+        return;
+      }
+
+      container.innerHTML = exams.map(exam => `
+        <div class="activity-row">
+          <div class="activity-left">
+            <div class="activity-icon-box">📘</div>
+            <div>
+              <div class="activity-name">${exam.subject}</div>
+              <div class="activity-meta">${exam.qCount} Questions · Available Now</div>
+            </div>
+          </div>
+          <button class="btn btn-success btn-sm" onclick="startExam('${exam.subject}')">Start Exam</button>
+        </div>`).join('');
+    } catch (e) {
+      console.error('Failed to load exams:', e);
+      document.getElementById('examList').innerHTML =
+        '<div class="empty-state"><div class="empty-icon">⚠️</div><div class="empty-text">Could not load exams</div></div>';
+    }
+  }
+
+  // ── Load Results ──
+  async function loadResults() {
+    try {
+      const studentID = localStorage.getItem('studentID');
+      const res = await fetch(`/api/my-results/${studentID}`);
+      const results = await res.json();
+      const container = document.getElementById('resultsList');
+
+      if (!results.length) {
+        container.innerHTML = '<div class="empty-state"><div class="empty-icon">📭</div><div class="empty-text">No results yet — take an exam!</div></div>';
+        return;
+      }
+
+      container.innerHTML = results.map(r => {
+        const total = r.total || 1;                                    // guard divide-by-zero
+        const pct   = Math.round((r.score / total) * 100);
+        const badge = pct >= 75 ? 'badge-green' : pct >= 50 ? 'badge-orange' : 'badge-red';
+        const dateStr = r.exam_date ? new Date(r.exam_date).toLocaleDateString() : '';
+        return `
+          <div class="activity-row">
+            <div class="activity-left">
+              <div class="activity-icon-box">📊</div>
+              <div>
+                <div class="activity-name">${r.subject}</div>
+                ${dateStr ? `<div class="activity-meta">${dateStr}</div>` : ''}
+              </div>
+            </div>
+            <span class="badge ${badge}">${r.score}/${r.total} · ${pct}%</span>
+          </div>`;
+      }).join('');
+    } catch (e) {
+      console.error('Failed to load results:', e);
+      document.getElementById('resultsList').innerHTML =
+        '<div class="empty-state"><div class="empty-icon">⚠️</div><div class="empty-text">Could not load results</div></div>';
+    }
+  }
+
+  function startExam(subject) {
+    localStorage.setItem('selSub', subject);
+    window.location.href = 'student.html';
+  }
+
+  window.onload = () => {
+    loadExams();
+    loadResults();
+  };
+</script>
 
 </body>
 </html>
