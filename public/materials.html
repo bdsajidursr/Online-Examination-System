@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="style.css">
+  <title>Study Materials — EduQuiz</title>
+</head>
+<body>
+
+<nav class="topnav">
+  <a href="home.html" class="topnav-brand">
+    <div class="brand-icon">📚</div>
+    <span class="brand-name">Edu<span>Quiz</span></span>
+  </a>
+  <div class="topnav-right">
+    <a href="home.html" class="btn btn-ghost btn-sm">← Dashboard</a>
+  </div>
+</nav>
+
+<div class="page-wrapper">
+  <div class="container">
+
+    <!-- TITLE -->
+    <div class="page-title-row">
+      <div>
+        <div class="page-title">📖 Study <span>Materials</span></div>
+        <div class="page-subtitle">Practice questions (no answers shown).</div>
+      </div>
+    </div>
+
+    <!-- EXAM LIST -->
+    <div class="panel">
+      <div class="panel-header">
+        <div class="panel-header-left">Available Exams</div>
+      </div>
+      <div id="examList">
+        <div style="padding:20px;">Loading exams...</div>
+      </div>
+    </div>
+
+    <!-- QUESTIONS -->
+    <div class="panel" style="margin-top:20px;">
+      <div class="panel-header">
+        <div class="panel-header-left">Questions</div>
+      </div>
+      <div id="questionList">
+        <div style="padding:20px;">Select an exam to view questions</div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+
+// ✅ LOAD FILTERED EXAMS (NO RUNNING EXAMS)
+async function loadExams() {
+  const res = await fetch('/api/practice-exams'); // IMPORTANT
+  const exams = await res.json();
+
+  const container = document.getElementById('examList');
+
+  if (!exams.length) {
+    container.innerHTML = '<div style="padding:20px;">No exams available</div>';
+    return;
+  }
+
+  container.innerHTML = exams.map(e => `
+    <div class="activity-row" onclick="loadQuestions('${e.subject}')" style="cursor:pointer;">
+      <div class="activity-left">
+        <div class="activity-icon-box">📘</div>
+        <div>
+          <div class="activity-name">${e.subject}</div>
+          <div class="activity-meta">${e.qCount} Questions</div>
+        </div>
+      </div>
+    </div>
+  `).join('');
+}
+
+
+// ✅ LOAD QUESTIONS (PRACTICE MODE)
+async function loadQuestions(subject) {
+  const res = await fetch(`/api/practice-questions/${subject}`);
+  const questions = await res.json();
+
+  const container = document.getElementById('questionList');
+
+  if (!questions.length) {
+    container.innerHTML = '<div style="padding:20px;">No questions found</div>';
+    return;
+  }
+
+  container.innerHTML = questions.map((q, i) => {
+
+    // ===== GENERAL QUESTION =====
+    if (q.type === 'general') {
+      return `
+        <div class="q-panel">
+          <div class="q-meta">
+            <span class="q-num-badge">Q${i + 1}</span>
+            <span class="q-type-badge">Written</span>
+          </div>
+
+          <div class="q-text">${q.question_text}</div>
+
+          <div class="q-answer">
+            <strong>Answer:</strong><br>
+            ${q.correct_option || '<em>No answer provided</em>'}
+          </div>
+        </div>
+      `;
+    }
+
+    // ===== MCQ QUESTION =====
+    const correct = String(q.correct_option || '').trim().toLowerCase();
+    return `
+      <div class="q-panel">
+        <div class="q-meta">
+          <span class="q-num-badge">Q${i + 1}</span>
+          <span class="q-type-badge">MCQ</span>
+        </div>
+
+        <div class="q-text">${q.question_text}</div>
+
+        <div class="q-options">
+          <div>A. ${q.option_a} ${correct === 'a' ? '✔️' : ''}</div>
+          <div>B. ${q.option_b} ${correct === 'b' ? '✔️' : ''}</div>
+          <div>C. ${q.option_c} ${correct === 'c' ? '✔️' : ''}</div>
+          <div>D. ${q.option_d} ${correct === 'd' ? '✔️' : ''}</div>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+
+// ✅ LOAD ON PAGE START
+loadExams();
+
+</script>
+
+
+</body>
+</html>

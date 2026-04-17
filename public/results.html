@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="style.css">
+  <title>My Results — EduQuiz</title>
+</head>
+<body>
+
+<nav class="topnav">
+  <a href="home.html" class="topnav-brand">
+    <div class="brand-icon">📚</div>
+    <span class="brand-name">Edu<span>Quiz</span></span>
+  </a>
+  <div class="topnav-right">
+    <a href="home.html" class="btn btn-ghost btn-sm">← Dashboard</a>
+  </div>
+</nav>
+
+<div class="page-wrapper">
+  <div class="container">
+    <div class="page-title-row">
+      <div>
+        <div class="page-title">📊 My <span>Results</span></div>
+        <div class="page-subtitle">Your complete exam history.</div>
+      </div>
+    </div>
+
+    <div class="stat-grid" id="myStats" style="margin-bottom:24px;"></div>
+
+    <div class="panel">
+      <div class="panel-header"><div class="panel-header-left">Exam History</div></div>
+      <div id="resultsList"><div class="empty-state"><div class="empty-icon">⏳</div><div class="empty-text">Loading...</div></div></div>
+    </div>
+  </div>
+</div>
+
+<script>
+async function loadResults() {
+  const studentID = localStorage.getItem('studentID');
+  const res = await fetch(`/api/my-results/${studentID}`);
+  const data = await res.json();
+
+  const container = document.getElementById('resultsList');
+  if (!data.length) {
+    container.innerHTML = '<div class="empty-state"><div class="empty-icon">📭</div><div class="empty-text">No results yet</div></div>';
+    return;
+  }
+
+  const totalExams = data.length;
+  const avgPct = (data.reduce((s,r) => s + r.score/Math.max(r.total,1)*100, 0) / totalExams).toFixed(0);
+  const best = data.reduce((b,r) => (r.score/r.total > b.score/b.total ? r : b), data[0]);
+
+  document.getElementById('myStats').innerHTML = `
+    <div class="stat-card blue"><div class="stat-icon">📝</div><div class="stat-value">${totalExams}</div><div class="stat-label">Exams Taken</div></div>
+    <div class="stat-card green"><div class="stat-icon">📈</div><div class="stat-value">${avgPct}%</div><div class="stat-label">Average Score</div></div>
+    <div class="stat-card orange"><div class="stat-icon">🏆</div><div class="stat-value">${Math.round(best.score/best.total*100)}%</div><div class="stat-label">Best Score</div></div>`;
+
+  container.innerHTML = data.map(r => {
+    const pct = Math.round(r.score / Math.max(r.total,1) * 100);
+    const badge = pct>=75?'badge-green':pct>=50?'badge-orange':'badge-red';
+    return `
+      <div class="activity-row">
+        <div class="activity-left">
+          <div class="activity-icon-box">📊</div>
+          <div>
+            <div class="activity-name">${r.subject}</div>
+            <div class="activity-meta">${new Date(r.exam_date).toLocaleString()}</div>
+          </div>
+        </div>
+        <div style="text-align:right;">
+          <span class="badge ${badge}" style="margin-bottom:4px;">${pct}%</span>
+          <div style="font-size:0.78rem;color:var(--text-muted);font-family:var(--mono);">${r.score}/${r.total}</div>
+        </div>
+      </div>`;
+  }).join('');
+}
+loadResults();
+</script>
+</body>
+</html>
