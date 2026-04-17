@@ -1,230 +1,285 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <style>
-        :root {
-            --primary-blue: lch(41.19% 38.28 280.01);
-            --bg-light: #f4f7f6;
-        }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="style.css">
+  <title>Exam — EduQuiz</title>
+  <style>
+    .exam-header {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      height: 64px;
+      background: rgba(13,17,23,0.95);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 32px;
+      z-index: 1000;
+    }
 
-        body {
-            margin: 0;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: var(--bg-light);
-        }
+    .exam-progress-bar {
+      position: fixed;
+      top: 64px; left: 0; right: 0;
+      height: 3px;
+      background: var(--surface);
+      z-index: 999;
+    }
 
-        .header {
-            background-color: var(--primary-blue);
-            color: white;
-            padding: 15px 40px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
+    .exam-progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--accent), var(--green));
+      transition: width 0.4s ease;
+    }
 
-        .timer-display {
-            background: rgba(255, 255, 255, 0.2);
-            padding: 5px 15px;
-            border-radius: 4px;
-            font-weight: bold;
-        }
+    .exam-body {
+      padding-top: 88px;
+      min-height: 100vh;
+      display: flex;
+      align-items: flex-start;
+      justify-content: center;
+      padding-bottom: 40px;
+    }
 
-        .main-container {
-            max-width: 900px;
-            margin: 40px auto;
-            background: white;
-            padding: 30px;
-            border-radius: 8px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
-        }
+    .exam-card {
+      width: 700px;
+      max-width: 95vw;
+      margin-top: 40px;
+    }
 
-        #qCount { color: var(--primary-blue); font-weight: 600; margin-bottom: 10px; }
-        #qText { font-size: 1.3rem; margin-bottom: 30px; color: #333; font-weight: bold; }
+    .q-panel {
+      background: var(--ink-2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 32px;
+      margin-bottom: 16px;
+    }
 
-        .option-btn {
-            display: block;
-            width: 100%;
-            text-align: left;
-            padding: 15px 20px;
-            margin-bottom: 12px;
-            border: 1px solid #e0e0e0;
-            border-radius: 6px;
-            background: white;
-            font-size: 1rem;
-            cursor: pointer;
-        }
+    .q-meta {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
 
-        .answer-input {
-            width: 100%;
-            padding: 15px;
-            font-size: 1.1rem;
-            border: 2px solid #ddd;
-            border-radius: 6px;
-            outline: none;
-        }
+    .q-num-badge {
+      font-family: var(--mono);
+      font-size: 0.78rem;
+      background: rgba(88,166,255,0.1);
+      color: var(--accent);
+      padding: 3px 10px;
+      border-radius: 6px;
+      border: 1px solid rgba(88,166,255,0.2);
+    }
 
-        .action-bar {
-            max-width: 900px;
-            margin: 20px auto;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
+    .q-text {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: var(--text);
+      line-height: 1.5;
+      letter-spacing: -0.01em;
+    }
 
-        .nav-btn {
-            padding: 10px 25px;
-            border-radius: 5px;
-            border: none;
-            cursor: pointer;
-            font-weight: 600;
-        }
+    .action-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
 
-        .prev-btn { background: #dcdcdc; color: #555; }
-        .blue-btn { background: var(--primary-blue); color: white; }
-    </style>
+    .answer-input {
+      width: 100%;
+      background: var(--ink);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      color: var(--text);
+      font-family: var(--font);
+      font-size: 1rem;
+      padding: 14px 16px;
+      outline: none;
+      transition: var(--transition);
+    }
+
+    .answer-input:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(88,166,255,0.1);
+    }
+
+    .timer-warning { animation: pulse 1s infinite; }
+    @keyframes pulse { 0%,100% { opacity:1; } 50% { opacity:0.6; } }
+  </style>
 </head>
 <body>
 
-<div class="header">
-    <strong id="subTitle">Ongoing Exam</strong>
-    <div>Time Left: <span id="timer" class="timer-display">00:00</span></div>
+<div class="exam-header">
+  <div style="display:flex;align-items:center;gap:12px;">
+    <div class="brand-icon" style="width:32px;height:32px;font-size:14px;">📚</div>
+    <strong id="subTitle" style="font-size:0.95rem;">Exam</strong>
+  </div>
+  <div style="display:flex;align-items:center;gap:16px;">
+    <div id="timer" class="timer-chip">00:00</div>
+    <span id="progressText" style="font-size:0.82rem;color:var(--text-muted);">Q 1 of —</span>
+  </div>
 </div>
 
-<div class="main-container">
-    <p id="qCount">Question 1</p>
-    <h2 id="qText">Loading...</h2>
-    <div id="options"></div>
+<div class="exam-progress-bar">
+  <div class="exam-progress-fill" id="progressFill" style="width:0%"></div>
 </div>
 
-<div class="action-bar">
-    <button class="nav-btn prev-btn" onclick="prev()">< Previous</button>
-    <div>
-        <button id="next" class="nav-btn blue-btn" onclick="next()" style="display:none;">Next ></button>
-        <button id="submit" class="nav-btn blue-btn" onclick="finish()" style="display:none;">Submit Exam</button>
+<div class="exam-body">
+  <div class="exam-card">
+    <div class="q-panel">
+      <div class="q-meta">
+        <span class="q-num-badge" id="qCount">Q1</span>
+        <span style="font-size:0.78rem;color:var(--text-muted);" id="qType">MCQ</span>
+      </div>
+      <div class="q-text" id="qText">Loading...</div>
     </div>
+
+    <div id="options"></div>
+
+    <div class="action-bar" style="margin-top:8px;">
+      <button class="btn btn-ghost" onclick="prev()" id="prevBtn">← Previous</button>
+      <div style="display:flex;gap:8px;">
+        <button id="next" class="btn btn-primary" onclick="next()" style="display:none;">Next →</button>
+        <button id="submit" class="btn btn-success" onclick="finish()" style="display:none;">Submit Exam ✓</button>
+      </div>
+    </div>
+  </div>
 </div>
+
+<div id="toast"></div>
 
 <script>
-let questions = [], current = 0, score = 0, time, clock;
+let questions = [], current = 0, score = 0, time = 0, clock;
 const sub = localStorage.getItem('selSub');
+let answers = {};
+
+function toast(msg, type='success') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'show ' + type;
+  setTimeout(() => t.className = '', 3000);
+}
 
 async function init() {
-    document.getElementById('subTitle').innerText = "Ongoing Exam: " + sub;
-    const res = await fetch(`/api/questions/${sub}`);
-    questions = await res.json();
-    time = questions.length * 60; 
-    startClock();
-    show();
+  document.getElementById('subTitle').textContent = sub + ' Exam';
+
+  const res = await fetch(`/api/questions/${sub}`);
+  questions = await res.json();
+
+  if (!questions || questions.length === 0) {
+    alert('No questions found!');
+    window.location.href = 'home.html';
+    return;
+  }
+
+  const schRes = await fetch(`/api/get-schedule/${sub}`);
+  const schedule = await schRes.json();
+
+  if (!schedule) { alert('Exam schedule not found!'); window.location.href = 'home.html'; return; }
+
+  const now = new Date();
+  const start = new Date(schedule.start_time);
+  const end = new Date(schedule.end_time);
+
+  if (now < start) { alert('Exam has not started yet!'); window.location.href = 'home.html'; return; }
+  if (now > end) { alert('Exam time is over!'); window.location.href = 'home.html'; return; }
+
+  const remaining = Math.floor((end - now) / 1000);
+  time = (schedule.timer && schedule.timer > 0) ? schedule.timer * 60 : remaining;
+
+  startClock();
+  show();
 }
 
 function startClock() {
-    clock = setInterval(() => {
-        time--;
-        let m = Math.floor(time/60), s = time%60;
-        document.getElementById('timer').innerText = `${m}:${s<10?'0'+s:s}`;
-        if(time <= 0) finish();
-    }, 1000);
+  clock = setInterval(() => {
+    time--;
+    const m = Math.floor(time / 60), s = time % 60;
+    const timerEl = document.getElementById('timer');
+    timerEl.textContent = `${m}:${s < 10 ? '0'+s : s}`;
+    if (time <= 60) timerEl.classList.add('timer-warning');
+    if (time <= 0) { time = 0; finish(); }
+  }, 1000);
 }
 
 function show() {
-    const q = questions[current];
-    document.getElementById('qCount').innerText = `Question ${current + 1} of ${questions.length}`;
-    document.getElementById('qText').innerText = q.question_text;
-    
-    const optDiv = document.getElementById('options');
-    optDiv.innerHTML = '';
+  const q = questions[current];
+  const pct = ((current + 1) / questions.length) * 100;
 
-    if (q.type === 'general') {
-        const input = document.createElement('input');
-        input.type = 'text';
-        input.className = 'answer-input';
-        input.id = 'generalAnswer';
-        optDiv.appendChild(input);
+  document.getElementById('progressFill').style.width = pct + '%';
+  document.getElementById('progressText').textContent = `Q ${current + 1} of ${questions.length}`;
+  document.getElementById('qCount').textContent = `Q${current + 1}`;
+  document.getElementById('qText').textContent = q.question_text;
+  document.getElementById('qType').textContent = (q.type === 'general') ? 'Short Answer' : 'MCQ';
 
-        input.oninput = () => {
-            const isLast = current === questions.length - 1;
-            document.getElementById('next').style.display = isLast ? 'none' : 'block';
-            document.getElementById('submit').style.display = isLast ? 'block' : 'none';
-        };
+  const optDiv = document.getElementById('options');
+  optDiv.innerHTML = '';
 
-    } else {
-        ['a','b','c','d'].forEach(letter => {
-            const optText = q[`option_${letter}`];
-            if(optText) {
-                const btn = document.createElement('button');
-                btn.className = 'option-btn';
-                btn.innerText = `${letter.toUpperCase()}. ${optText}`;
-                btn.onclick = () => check(letter.toUpperCase(), btn);
-                optDiv.appendChild(btn);
-            }
-        });
-
-        document.getElementById('next').style.display = 'none';
-        document.getElementById('submit').style.display = 'none';
-    }
-}
-
-function check(choice, btn) {
-    const q = questions[current];
-    const allBtns = document.querySelectorAll('.option-btn');
-    allBtns.forEach(b => b.style.borderColor = "#e0e0e0");
-    
-    if(choice === q.correct_option) { 
-        btn.style.backgroundColor = "#d4edda";
-        btn.style.borderColor = "#28a745";
-        score++;
-    } else {
-        btn.style.backgroundColor = "#f8d7da";
-        btn.style.borderColor = "#dc3545";
-    }
-
-    const isLast = current === questions.length - 1;
-    document.getElementById('next').style.display = isLast ? 'none' : 'block';
-    document.getElementById('submit').style.display = isLast ? 'block' : 'none';
-}
-
-function next() { 
-    const q = questions[current];
-    if(q.type === 'general') {
-        const userAns = document.getElementById('generalAnswer').value.trim();
-        if(userAns.toLowerCase() === q.correct_option.toLowerCase()) {
-            score++;
-        }
-    }
-    current++; 
-    show(); 
-}
-
-function prev() { if(current > 0) { current--; show(); } }
-
-
-// ✅ FIXED FUNCTION (IMPORTANT)
-async function finish() {
-    const q = questions[current];
-
-    if(q.type === 'general') {
-        const userAns = document.getElementById('generalAnswer').value.trim();
-        if(userAns.toLowerCase() === q.correct_option.toLowerCase()) {
-            score++;
-        }
-    }
-
-    clearInterval(clock);
-
-    await fetch('/api/save-result', {
-        method: 'POST',
-        headers: {'Content-Type':'application/json'},
-        body: JSON.stringify({ 
-            student_name: localStorage.getItem('userName'),
-            student_id: localStorage.getItem('studentID'),
-            score: score,
-            total: questions.length,
-            subject: sub
-        })
+  if (q.type === 'general') {
+    const input = document.createElement('input');
+    input.className = 'answer-input';
+    input.placeholder = 'Type your answer here...';
+    input.value = answers[q.id] || '';
+    input.style.marginBottom = '12px';
+    input.oninput = () => { answers[q.id] = input.value; toggleButtons(); };
+    optDiv.appendChild(input);
+  } else {
+    ['a','b','c','d'].forEach(letter => {
+      const optText = q[`option_${letter}`];
+      if (!optText) return;
+      const btn = document.createElement('button');
+      btn.className = 'option-btn' + (answers[q.id] === letter.toUpperCase() ? ' selected' : '');
+      btn.innerHTML = `<strong style="color:var(--accent);margin-right:10px;">${letter.toUpperCase()}.</strong> ${optText}`;
+      btn.onclick = (e) => {
+        answers[q.id] = letter.toUpperCase();
+        document.querySelectorAll('.option-btn').forEach(b => b.className = 'option-btn');
+        btn.className = 'option-btn selected';
+        toggleButtons();
+      };
+      optDiv.appendChild(btn);
     });
+  }
 
-    alert("Exam Finished!");
-    window.location.href='home.html';
+  document.getElementById('prevBtn').style.opacity = current === 0 ? '0.3' : '1';
+  toggleButtons();
+}
+
+function toggleButtons() {
+  const answered = answers[questions[current].id];
+  const isLast = current === questions.length - 1;
+  document.getElementById('next').style.display = (answered && !isLast) ? 'flex' : 'none';
+  document.getElementById('submit').style.display = (answered && isLast) ? 'flex' : 'none';
+}
+
+function next() { current++; show(); }
+function prev() { if (current > 0) { current--; show(); } }
+
+async function finish() {
+  clearInterval(clock);
+  score = 0;
+  questions.forEach(q => {
+    const ua = answers[q.id];
+    if (!ua) return;
+    if (q.type === 'general') { if (ua.toLowerCase() === q.correct_option.toLowerCase()) score++; }
+    else { if (ua === q.correct_option) score++; }
+  });
+
+  await fetch('/api/save-result', {
+    method: 'POST',
+    headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({
+      student_name: localStorage.getItem('userName'),
+      student_id: localStorage.getItem('studentID'),
+      score, total: questions.length, subject: sub
+    })
+  });
+
+  const pct = Math.round(score / questions.length * 100);
+  alert(`Exam submitted!\nScore: ${score}/${questions.length} (${pct}%)`);
+  window.location.href = 'home.html';
 }
 
 init();
