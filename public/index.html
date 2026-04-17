@@ -1,120 +1,212 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <link rel="stylesheet" href="style.css">
-    <title>Login | EduQuiz</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="style.css">
+  <title>EduQuiz — Login</title>
 </head>
 <body>
-    <div class="login-wrapper">
-        <div class="login-illustration">
-            <div class="brand-text">Online Examination System</div>
-            <img src="3964546.jpg" alt="Exam Illustration" style="width:100%;">
+
+<div class="login-wrapper">
+  <!-- Ambient BG -->
+  <div class="login-bg">
+    <div class="login-bg-circle" style="width:500px;height:500px;background:#58a6ff;top:-100px;left:-100px;"></div>
+    <div class="login-bg-circle" style="width:400px;height:400px;background:#bc8cff;bottom:-80px;right:-80px;"></div>
+    <div class="login-bg-circle" style="width:200px;height:200px;background:#3fb950;bottom:30%;left:20%;"></div>
+  </div>
+
+  <div class="login-card">
+    <!-- LEFT PANEL -->
+    <div class="login-left">
+      <div class="login-brand">
+        <div class="brand-icon" style="width:44px;height:44px;font-size:20px;">📚</div>
+        <div>
+          <div style="font-size:1.1rem;font-weight:800;letter-spacing:-0.02em;">Edu<span style="color:var(--accent)">Quiz</span></div>
+          <div style="font-size:0.72rem;color:var(--text-muted);">Online Examination System</div>
         </div>
+      </div>
 
-        <div class="login-form-container">
-            <div class="auth-tabs">
-                <button id="tabL" class="active" onclick="toggleAuth('L')">Login</button>
-                <button id="tabR" onclick="toggleAuth('R')">Register</button>
-            </div>
+      <div class="login-headline">Smart Exams.<br><span>Better Results.</span></div>
+      <div class="login-sub">A modern platform for creating, managing, and taking exams with real-time results and analytics.</div>
 
-            <h2 id="formHeader">Welcome Back</h2>
-
-            <div id="loginView">
-                <div class="role-grid">
-                    <button id="roleStuL" class="active" onclick="setRole('student', 'L')">Student</button>
-                    <button id="roleAdmL" onclick="setRole('admin', 'L')">Admin</button>
-                </div>
-                <div id="pinGroup" class="input-group" style="display: none;">
-                    <label>Admin Secret PIN</label>
-                    <input type="password" id="adminPin">
-                </div>
-                <div class="input-group"><label>Email</label><input type="email" id="email"></div>
-                <div class="input-group"><label>Password</label><input type="password" id="pass"></div>
-                <button class="btn-login" onclick="doLogin()">Login</button>
-            </div>
-
-            <div id="regView" style="display: none;">
-                <div class="role-grid">
-                    <button id="roleStuR" class="active" onclick="setRole('student', 'R')">Student</button>
-                    <button id="roleAdmR" onclick="setRole('admin', 'R')">Admin</button>
-                </div>
-                <div class="input-group"><label>Full Name</label><input type="text" id="regName"></div>
-                <div class="input-group"><label>ID Number</label><input type="text" id="regSID"></div>
-                <div class="input-group"><label>Email</label><input type="email" id="regEmail"></div>
-                <div class="input-group"><label>Password</label><input type="password" id="regPass"></div>
-                <button class="btn-login" onclick="doRegister()">Register</button>
-            </div>
-        </div>
+      <div class="login-features">
+        <div class="login-feature"><div class="login-feature-dot"></div>Create MCQ & Open-ended exams</div>
+        <div class="login-feature"><div class="login-feature-dot" style="background:var(--green);"></div>Live timer & schedule enforcement</div>
+        <div class="login-feature"><div class="login-feature-dot" style="background:var(--purple);"></div>Detailed result statistics</div>
+        <div class="login-feature"><div class="login-feature-dot" style="background:var(--orange);"></div>Student & admin management</div>
+      </div>
     </div>
 
-    <script>
-        let loginRole = 'student';
-        let regRole = 'student';
+    <!-- RIGHT PANEL -->
+    <div class="login-right">
+      <div style="margin-bottom:28px;">
+        <div style="font-size:1.4rem;font-weight:800;letter-spacing:-0.03em;margin-bottom:4px;" id="formHeader">Welcome back</div>
+        <div style="font-size:0.85rem;color:var(--text-muted);">Sign in to your account to continue</div>
+      </div>
 
-        function setRole(role, mode) {
-            if(mode === 'L') {
-                loginRole = role;
-                document.getElementById('roleStuL').className = (role === 'student' ? 'active' : '');
-                document.getElementById('roleAdmL').className = (role === 'admin' ? 'active' : '');
-                document.getElementById('pinGroup').style.display = (role === 'admin' ? 'block' : 'none');
-            } else {
-                regRole = role;
-                document.getElementById('roleStuR').className = (role === 'student' ? 'active' : '');
-                document.getElementById('roleAdmR').className = (role === 'admin' ? 'active' : '');
-            }
-        }
+      <div class="auth-tabs">
+        <button id="tabL" class="auth-tab active" onclick="toggleAuth('L')">Login</button>
+        <button id="tabR" class="auth-tab" onclick="toggleAuth('R')">Register</button>
+      </div>
 
-        function toggleAuth(mode) {
-            document.getElementById('loginView').style.display = (mode === 'L' ? 'block' : 'none');
-            document.getElementById('regView').style.display = (mode === 'R' ? 'block' : 'none');
-            document.getElementById('tabL').className = (mode === 'L' ? 'active' : '');
-            document.getElementById('tabR').className = (mode === 'R' ? 'active' : '');
-        }
+      <!-- LOGIN VIEW -->
+      <div id="loginView">
+        <div class="role-grid" style="margin-bottom:18px;">
+          <button id="roleStuL" class="role-btn active" onclick="setRole('student','L')">🎓 Student</button>
+          <button id="roleAdmL" class="role-btn" onclick="setRole('admin','L')">🛡 Admin</button>
+        </div>
 
-      
-async function doLogin() {
-    const res = await fetch('/api/login', {
-        method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({
-            email: document.getElementById('email').value,
-            password: document.getElementById('pass').value,
-            role: loginRole,
-            pin: document.getElementById('adminPin').value
-        })
-    });
+        <div id="pinGroup" class="form-group" style="display:none;">
+          <label class="form-label">Admin Secret PIN</label>
+          <input type="password" id="adminPin" class="input" placeholder="Enter PIN">
+        </div>
 
-    const data = await res.json();
+        <div class="form-group">
+          <label class="form-label">Email Address</label>
+          <input type="email" id="email" class="input" placeholder="you@example.com">
+        </div>
 
-    if(data.success) {
-        // ✅ ADD THIS (IMPORTANT FIX)
-        localStorage.setItem('userName', data.name);
-        localStorage.setItem('studentID', data.sid);
+        <div class="form-group">
+          <label class="form-label">Password</label>
+          <input type="password" id="pass" class="input" placeholder="••••••••">
+        </div>
 
-        window.location.href = (data.role === 'admin' ? 'admin.html' : 'home.html');
-    } else {
-        alert(data.message);
-    }
+        <button class="btn btn-primary" style="width:100%;justify-content:center;padding:12px;margin-top:4px;" onclick="doLogin()">
+          Sign In →
+        </button>
+      </div>
+
+      <!-- REGISTER VIEW -->
+      <div id="regView" style="display:none;">
+        <div class="role-grid" style="margin-bottom:18px;">
+          <button id="roleStuR" class="role-btn active" onclick="setRole('student','R')">🎓 Student</button>
+          <button id="roleAdmR" class="role-btn" onclick="setRole('admin','R')">🛡 Admin</button>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Full Name</label>
+          <input type="text" id="regName" class="input" placeholder="John Doe">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">ID Number</label>
+          <input type="text"
+       id="regSID"
+       class="input"
+       placeholder="123-456-789"
+       oninput="formatStudentID(this)"
+       maxlength="11">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Email Address</label>
+          <input type="email" id="regEmail" class="input" placeholder="you@example.com">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Password</label>
+          <input type="password" id="regPass" class="input" placeholder="••••••••">
+        </div>
+
+        <button class="btn btn-success" style="width:100%;justify-content:center;padding:12px;margin-top:4px;" onclick="doRegister()">
+          Create Account →
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+  const studentIdPattern = /^\d{3}-\d{3}-\d{3}$/;
+let loginRole = 'student', regRole = 'student';
+
+function toast(msg, type='success') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'show ' + type;
+  setTimeout(() => t.className = '', 3000);
+}
+
+function setRole(role, mode) {
+  if (mode === 'L') {
+    loginRole = role;
+    document.getElementById('roleStuL').className = 'role-btn' + (role==='student'?' active':'');
+    document.getElementById('roleAdmL').className = 'role-btn' + (role==='admin'?' active':'');
+    document.getElementById('pinGroup').style.display = role==='admin' ? 'flex' : 'none';
+  } else {
+    regRole = role;
+    document.getElementById('roleStuR').className = 'role-btn' + (role==='student'?' active':'');
+    document.getElementById('roleAdmR').className = 'role-btn' + (role==='admin'?' active':'');
+  }
 }
 
 
-        async function doRegister() {
-            const res = await fetch('/api/register', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({
-                    name: document.getElementById('regName').value,
-                    sid: document.getElementById('regSID').value,
-                    email: document.getElementById('regEmail').value,
-                    pass: document.getElementById('regPass').value,
-                    role: regRole
-                })
-            });
-            const data = await res.json();
-            if(data.success) { alert("Success!"); toggleAuth('L'); }
-            else alert(data.message);
-        }
-    </script>
+function toggleAuth(mode) {
+  document.getElementById('loginView').style.display = mode==='L' ? 'block' : 'none';
+  document.getElementById('regView').style.display = mode==='R' ? 'block' : 'none';
+  document.getElementById('tabL').className = 'auth-tab' + (mode==='L'?' active':'');
+  document.getElementById('tabR').className = 'auth-tab' + (mode==='R'?' active':'');
+  document.getElementById('formHeader').textContent = mode==='L' ? 'Welcome back' : 'Create account';
+}
+function formatStudentID(input) {
+  let v = input.value.replace(/\D/g, '').slice(0, 9);
+
+  if (v.length > 6) {
+    input.value = `${v.slice(0,3)}-${v.slice(3,6)}-${v.slice(6)}`;
+  } else if (v.length > 3) {
+    input.value = `${v.slice(0,3)}-${v.slice(3)}`;
+  } else {
+    input.value = v;
+  }
+}
+
+async function doLogin() {
+  try {
+    const res = await fetch('/api/login', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({
+        email: document.getElementById('email').value,
+        password: document.getElementById('pass').value,
+        role: loginRole,
+        pin: document.getElementById('adminPin').value
+      })
+    });
+    const data = await res.json();
+    if (data.success) {
+      localStorage.setItem('userName', data.name);
+      localStorage.setItem('studentID', data.sid);
+      window.location.href = data.role === 'admin' ? 'admin.html' : 'home.html';
+    } else {
+      toast(data.message || 'Invalid credentials', 'error');
+    }
+  } catch(e) { toast('Connection error', 'error'); }
+}
+
+async function doRegister() {
+  try {
+    const res = await fetch('/api/register', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({
+        name: document.getElementById('regName').value,
+        sid: document.getElementById('regSID').value,
+        email: document.getElementById('regEmail').value,
+        pass: document.getElementById('regPass').value,
+        role: regRole
+      })
+    });
+    const data = await res.json();
+    if (data.success) { toast('Account created! Please login.'); toggleAuth('L'); }
+    else toast(data.message || 'Registration failed', 'error');
+  } catch(e) { toast('Connection error', 'error'); }
+}
+
+document.addEventListener('keydown', e => { if(e.key==='Enter') { document.getElementById('loginView').style.display!=='none' ? doLogin() : doRegister(); }});
+</script>
+
 </body>
 </html>
