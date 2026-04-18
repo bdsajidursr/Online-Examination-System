@@ -1,531 +1,538 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-<meta charset="UTF-8">
-<title>Results Dashboard</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Results & Statistics — EduQuiz</title>
+  <style>
+    :root {
+      --blue:   #3b82f6;
+      --green:  #22c55e;
+      --orange: #f97316;
+      --red:    #ef4444;
+      --purple: #a855f7;
+      --bg:     #f1f5f9;
+      --surface:#ffffff;
+      --border: #e2e8f0;
+      --text:   #0f172a;
+      --text-muted: #64748b;
+      --text-dim:   #94a3b8;
+      --nav-bg: #1e293b;
+      --mono:   'Courier New', monospace;
+      --radius: 12px;
+      --shadow: 0 4px 16px rgba(0,0,0,.07);
+    }
 
-<style>
-body { margin:0; font-family:Segoe UI; background:#f4f7fb; }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
 
-/* HEADER */
-.title-bar {
-    padding:15px 25px;
-    margin:20px;
-    border-radius:10px;
-    font-size:20px;
-    font-weight:600;
-    color:white;
-    background:#2ecc71;
-}
+    body {
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
 
-/* CONTAINER */
-.container { padding:0 20px 20px; }
+    /*NAV*/
+    .topnav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
+      background: var(--nav-bg);
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 28px; height: 60px;
+      box-shadow: 0 2px 12px rgba(0,0,0,.18);
+    }
+    .topnav-brand {
+      display: flex; align-items: center; gap: 10px;
+      text-decoration: none; color: white;
+    }
+    .brand-icon { font-size: 1.4rem; }
+    .brand-name { font-size: 1.15rem; font-weight: 700; letter-spacing: -.3px; }
+    .brand-name span { color: var(--blue); }
+    .topnav-right { display: flex; align-items: center; gap: 10px; }
+    .btn-ghost {
+      background: transparent;
+      border: 1.5px solid rgba(255,255,255,.25);
+      color: #cbd5e1;
+      padding: 6px 14px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: .82rem;
+      font-weight: 600;
+      text-decoration: none;
+      transition: .2s;
+    }
+    .btn-ghost:hover { background: rgba(255,255,255,.08); color: white; }
 
-/* FILTER */
-.filter {
-    margin-bottom:15px;
-}
+    /*LAYOUT*/
+    .page-wrapper { padding-top: 76px; }
+    .container { max-width: 1180px; margin: 0 auto; padding: 24px 20px 40px; }
 
-select {
-    padding:8px;
-    border-radius:6px;
-}
+    .page-title-row {
+      display: flex; align-items: flex-start;
+      justify-content: space-between;
+      gap: 16px; flex-wrap: wrap;
+      margin-bottom: 28px;
+    }
+    .page-title { font-size: 1.7rem; font-weight: 800; }
+    .page-title span { color: var(--blue); }
+    .page-subtitle { color: var(--text-muted); margin-top: 4px; font-size: .95rem; }
 
-/* STATS */
-.stats-grid {
-    display:grid;
-    grid-template-columns: repeat(4,1fr);
-    gap:20px;
-    margin-bottom:25px;
-}
+    /*SEARCH & FILTER*/
+    .search-bar {
+      display: flex; align-items: center; gap: 8px;
+      background: var(--surface);
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      padding: 7px 12px;
+    }
+    .search-bar input {
+      border: none; outline: none; background: transparent;
+      font-size: .88rem; color: var(--text); width: 100%;
+    }
+    .select {
+      background: var(--surface);
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      padding: 8px 12px;
+      font-size: .88rem;
+      color: var(--text);
+      outline: none;
+      cursor: pointer;
+    }
+    .select:focus { border-color: var(--blue); }
 
-.stat-card {
-    background:white;
-    padding:20px;
-    border-radius:12px;
-    box-shadow:0 4px 10px rgba(0,0,0,.05);
-    transition:0.3s;
-}
-#pagination button:hover {
-    background:#27ae60;
-    color:white;
-    transform: scale(1.05);
-}
+    /*STAT CARDS*/
+    .stat-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+    @media (max-width: 720px) { .stat-grid { grid-template-columns: repeat(2,1fr); } }
 
-input:focus {
-    outline:none;
-    border:1px solid #2ecc71;
-}
+    .stat-card {
+      background: var(--surface);
+      border-radius: var(--radius);
+      padding: 20px;
+      box-shadow: var(--shadow);
+      border: 1px solid var(--border);
+      display: flex; flex-direction: column; gap: 4px;
+      transition: transform .2s;
+    }
+    .stat-card:hover { transform: translateY(-3px); }
+    .stat-card.blue  { border-top: 3px solid var(--blue); }
+    .stat-card.green { border-top: 3px solid var(--green); }
+    .stat-card.orange{ border-top: 3px solid var(--orange); }
+    .stat-card.red   { border-top: 3px solid var(--red); }
+    .stat-icon { font-size: 1.4rem; }
+    .stat-value { font-size: 1.55rem; font-weight: 800; color: var(--text); }
+    .stat-label { font-size: .78rem; color: var(--text-muted); font-weight: 500; }
 
-.stat-card:hover { transform:translateY(-5px); }
+    /*PANEL*/
+    .panel {
+      background: var(--surface);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      border: 1px solid var(--border);
+      margin-bottom: 20px;
+      overflow: hidden;
+    }
+    .panel-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--border);
+      font-weight: 700; font-size: .95rem;
+    }
+    .panel-header-left { display: flex; align-items: center; gap: 8px; }
 
-.stat-title { color:#777; font-size:14px; }
-.stat-value { font-size:24px; font-weight:bold; margin-top:5px; }
+    /*TABLE*/
+    .data-table { width: 100%; border-collapse: collapse; }
+    .data-table th, .data-table td {
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border);
+      text-align: left;
+      font-size: .88rem;
+    }
+    .data-table th {
+      background: #f8fafc;
+      font-weight: 700;
+      color: var(--text-muted);
+      font-size: .78rem;
+      text-transform: uppercase;
+      letter-spacing: .04em;
+    }
+    .data-table tr:last-child td { border-bottom: none; }
+    .data-table tr:hover td { background: #f8faff; }
 
-/* COLORS */
-.green { border-left:5px solid #2ecc71; }
-.blue { border-left:5px solid #3498db; }
-.orange { border-left:5px solid #f39c12; }
-.red { border-left:5px solid #e74c3c; }
+    /*PAGINATION*/
+    .pagination {
+      display: flex; flex-wrap: wrap; justify-content: center;
+      gap: 6px; padding: 14px;
+      border-top: 1px solid var(--border);
+    }
+    .page-btn {
+      padding: 6px 13px; border-radius: 7px; border: 1.5px solid var(--border);
+      background: var(--surface); color: var(--text);
+      font-size: .82rem; font-weight: 600; cursor: pointer;
+      transition: .2s;
+    }
+    .page-btn:hover { border-color: var(--blue); color: var(--blue); }
+    .page-btn.active {
+      background: var(--blue); color: white;
+      border-color: var(--blue);
+    }
 
-/* CARD */
-.card {
-    background:white;
-    padding:20px;
-    border-radius:12px;
-    box-shadow:0 4px 10px rgba(0,0,0,.05);
-    margin-bottom:20px;
-}
+    /*BADGES*/
+    .badge {
+      display: inline-block; padding: 3px 10px;
+      border-radius: 20px; font-size: .75rem; font-weight: 700;
+    }
+    .badge-green  { background: #dcfce7; color: #166534; }
+    .badge-orange { background: #ffedd5; color: #9a3412; }
+    .badge-red    { background: #fee2e2; color: #991b1b; }
 
-/* TABLE */
-table { width:100%; border-collapse:collapse; }
+    /*PROGRESS BAR*/
+    .progress-bar {
+      height: 8px; background: #e2e8f0;
+      border-radius: 20px; overflow: hidden;
+    }
+    .progress-fill {
+      height: 100%;
+      background: var(--green);
+      border-radius: 20px;
+      min-width: 4%;
+      transition: width 1s ease;
+    }
 
-th, td {
-    padding:12px;
-    border-bottom:1px solid #eee;
-    text-align:left;   /* ✅ add this */
-}
+    /*CHART ROWS*/
+    .chart-row { margin-bottom: 14px; }
+    .chart-label-row {
+      display: flex; justify-content: space-between;
+      font-size: .83rem; margin-bottom: 5px;
+      color: var(--text);
+    }
 
-th {
-    background:#f1f5f9;
-}
+    /*EMPTY STATE*/
+    .empty-state {
+      text-align: center; padding: 36px;
+      color: var(--text-dim);
+    }
+    .empty-text { font-size: .88rem; }
 
-th:nth-child(4), td:nth-child(4) {
-    text-align:center;
-}
-/* TOP STUDENTS */
-.top-item {
-    display:flex;
-    justify-content:space-between;
-    padding:10px;
-    border-bottom:1px solid #eee;
-}
+    /*TWO-COL GRID*/
+    .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    @media (max-width: 780px) { .two-col { grid-template-columns: 1fr; } }
 
-/* PROGRESS BAR */
-.bar {
-    height:8px;
-    background:#eee;
-    border-radius:5px;
-    overflow:hidden;
-    margin-top:5px;
-}
-
-.fill {
-    min-width: 5%;
-    height:100%;
-    background:#2ecc71;
-}
-
-
-
-/* CHART */
-.chart-row {
-    margin-bottom:10px;
-}
-tr:hover {
-    background:#f9fbff;
-}
-.card {
-    animation: fadeIn 0.4s ease;
-}
-
-@keyframes fadeIn {
-    from {opacity:0; transform:translateY(10px);}
-    to {opacity:1; transform:translateY(0);}
-}
-#pagination button:hover {
-    transform: scale(1.05);
-}
-#pagination {
-    display: flex;
-    justify-content: center;
-    flex-wrap: wrap;
-}
-</style>
+    /*ANIMATION*/
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .panel { animation: fadeIn .4s ease both; }
+  </style>
 </head>
-
 <body>
 
-<div class="title-bar">📊 Results Dashboard</div>
+<nav class="topnav">
+  <a href="admin.html" class="topnav-brand">
+    <div class="brand-icon">📚</div>
+    <span class="brand-name">Edu<span>Quiz</span></span>
+  </a>
+  <div class="topnav-right">
+    <a href="admin.html" class="btn-ghost">← Dashboard</a>
+  </div>
+</nav>
 
-<div class="container">
+<div class="page-wrapper">
+  <div class="container">
 
-<!-- FILTER -->
-<div class="filter">
-    <label>Filter by Subject:</label>
-    <select id="subjectFilter" onchange="applyFilter()">
-        <option value="all">All</option>
-    </select>
-</div>
-
-<!-- STATS -->
-<div class="stats-grid">
-    <div class="stat-card green">
-        <div class="stat-title">Total Students</div>
-        <div class="stat-value" id="total">0</div>
+    <!-- TITLE ROW -->
+    <div class="page-title-row">
+      <div>
+        <div class="page-title">📊 Results &amp; <span>Statistics</span></div>
+        <div class="page-subtitle">Analyze student performance across all exams.</div>
+      </div>
+      <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+        <div class="search-bar" style="width:220px;">
+          <span style="color:var(--text-dim);">🔍</span>
+          <input type="text" placeholder="Search student..." id="searchBox" oninput="searchStudent()">
+        </div>
+        <select id="subjectFilter" class="select" style="width:160px;" onchange="applyFilter()">
+          <option value="all">All Subjects</option>
+        </select>
+      </div>
     </div>
 
-    <div class="stat-card blue">
-        <div class="stat-title">Average Score</div>
-        <div class="stat-value" id="avg">0</div>
+    <!-- STAT CARDS -->
+    <div class="stat-grid">
+      <div class="stat-card blue">
+        <div class="stat-icon">👥</div>
+        <div class="stat-value" id="total">—</div>
+        <div class="stat-label">Total Students</div>
+      </div>
+      <div class="stat-card green">
+        <div class="stat-icon">📈</div>
+        <div class="stat-value" id="avg">—</div>
+        <div class="stat-label">Average Score</div>
+      </div>
+      <div class="stat-card orange">
+        <div class="stat-icon">✅</div>
+        <div class="stat-value" id="pass">—</div>
+        <div class="stat-label">Pass Rate</div>
+      </div>
+      <div class="stat-card red">
+        <div class="stat-icon">🏆</div>
+        <div class="stat-value" id="maxScore">—</div>
+        <div class="stat-label">Highest Score</div>
+      </div>
     </div>
 
-    <div class="stat-card orange">
-        <div class="stat-title">Pass Rate</div>
-        <div class="stat-value" id="pass">0%</div>
-    </div>
-
-    <div class="stat-card red">
-        <div class="stat-title">Highest Score</div>
-        <div class="stat-value" id="max">0</div>
-    </div>
-</div>
-<div style="margin-bottom:10px;">
-    <input type="text" id="searchBox" placeholder="🔍 Search student..."
-        style="padding:8px; width:250px; border-radius:6px; border:1px solid #ccc;"
-        oninput="searchStudent()">
-</div>
-
-<!-- TABLE -->
-<div class="card">
-    <h3>📋 Student Results</h3>
-    <table>
-        <thead>
+    <!-- TABLE (full width) -->
+    <div class="panel" style="margin-bottom:20px;">
+      <div class="panel-header">
+        <div class="panel-header-left">📋 Student Results</div>
+      </div>
+      <div style="overflow-x:auto;">
+        <table class="data-table">
+          <thead>
             <tr>
-                <th>ID</th>
-                <th>Name</th>
-                <th>Subject</th>
-                <th>Score</th>
+              <th>Student ID</th>
+              <th>Name</th>
+              <th>Subject</th>
+              <th>Score</th>
+              <th>%</th>
             </tr>
-        </thead>
-        <tbody id="table"></tbody>
-    </table>
-</div>
-<div id="pagination" style="margin-top:15px; text-align:center;"></div>
+          </thead>
+          <tbody id="table"></tbody>
+        </table>
+      </div>
+      <div id="pagination" class="pagination"></div>
+    </div>
 
+    <!-- BOTTOM TWO COLUMNS -->
+    <div class="two-col">
 
-<!-- TOP STUDENTS -->
-<div class="card">
-    <h3>🏆 Top Performers</h3>
-    <div id="top"></div>
-</div>
+      <!-- TOP PERFORMERS -->
+      <div class="panel">
+        <div class="panel-header">
+          <div class="panel-header-left">🏆 Top Performers</div>
+        </div>
+        <div id="top" style="padding-bottom:8px;"></div>
+      </div>
 
-<!-- CHART -->
-<div class="card">
-    <h3>📈 Score Distribution</h3>
-    <div id="chart"></div>
-</div>
+      <!-- DISTRIBUTION CHART -->
+      <div class="panel">
+        <div class="panel-header">
+          <div class="panel-header-left">📈 Score Distribution</div>
+        </div>
+        <div id="chart" style="padding:20px;"></div>
+      </div>
 
+    </div>
+  </div>
 </div>
 
 <script>
+  let allData = [], filtered = [], currentPage = 1, rowsPerPage = 8;
 
-let allData = [];
-let filtered = [];
-let currentPage = 1;
-const rowsPerPage = 6;
+  /*LOAD*/
+  async function loadData() {
+    try {
+      const res = await fetch('/api/get-all-results');
+      allData = await res.json();
+      filtered = allData;
+      loadSubjects();
+      updateUI();
+    } catch (e) {
+      console.error('Failed to load data:', e);
+    }
+  }
 
-async function loadData(){
-    const res = await fetch('/api/get-all-results');
-    const data = await res.json();
-
-    allData = data;
-    filtered = data;
-
-    loadSubjects();
-    updateUI();
-}
-
-function loadSubjects(){
+  /*SUBJECTS*/
+  function loadSubjects() {
     const select = document.getElementById('subjectFilter');
-
-    const subjects = [...new Set(allData.map(x=>x.subject))];
-
-    subjects.forEach(s=>{
-        select.innerHTML += `<option value="${s}">${s}</option>`;
+    const subjects = [...new Set(allData.map(x => x.subject))];
+    subjects.forEach(s => {
+      const opt = document.createElement('option');
+      opt.value = s; opt.textContent = s;
+      select.appendChild(opt);
     });
-}
+  }
 
-function applyFilter(){
-    const val = subjectFilter.value;
-    const text = document.getElementById('searchBox').value.toLowerCase();
-
-    filtered = allData.filter(s => {
-        const matchSubject = val === 'all' || s.subject === val;
-        const matchName = s.student_name.toLowerCase().includes(text);
-        return matchSubject && matchName;
-    });
-
+  /*FILTER & SEARCH (shared logic, no duplication)*/
+  function applyFilter() {
+    const val  = document.getElementById('subjectFilter').value;
+    const text = document.getElementById('searchBox').value.toLowerCase().trim();
+    filtered = allData.filter(s =>
+      (val === 'all' || s.subject === val) &&
+      s.student_name.toLowerCase().includes(text)
+    );
     currentPage = 1;
     updateUI();
-}
+  }
 
-function updateUI(){
+  // searchStudent just delegates to applyFilter (avoids duplicate logic bug)
+  function searchStudent() { applyFilter(); }
+
+  /*UPDATE ALL*/
+  function updateUI() {
     renderTable();
     stats();
     topStudents();
     chart();
-}
+  }
 
-/* TABLE */
+  /*STATS*/
+  function stats() {
+    const ids = ['total','avg','pass','maxScore'];
+    if (!filtered.length) {
+      ids.forEach(id => document.getElementById(id).textContent = '0');
+      return;
+    }
 
-function searchStudent(){
-    const text = document.getElementById('searchBox').value.toLowerCase();
-    const subjectVal = document.getElementById('subjectFilter').value;
-
-    filtered = allData.filter(s => {
-        const matchName = s.student_name.toLowerCase().includes(text);
-        const matchSubject = subjectVal === 'all' || s.subject === subjectVal;
-        return matchName && matchSubject;
+    // Group scores by student ID across multiple subjects
+    const map = {};
+    filtered.forEach(s => {
+      const k = s.student_id;
+      if (!map[k]) map[k] = { name: s.student_name, score: 0, total: 0 };
+      map[k].score += Number(s.score);
+      map[k].total += Number(s.total || 100);
     });
 
-    currentPage = 1;
-    updateUI();
-}
-/* STATS */
-function stats(){
-
-    if(filtered.length === 0){
-        total.innerText = 0;
-        avg.innerText = "0";
-        pass.innerText = "0";
-        max.innerText = "0";
-        return;
-    }
-
-    const studentMap = {};
-
-    // ✅ group by student
-    filtered.forEach(s => {
-    const key = s.student_id;
-    const score = Number(s.score);
-    const totalMarks = Number(s.total || 100);
-
-    if(!studentMap[key]){
-        studentMap[key] = {
-            name: s.student_name,  // keep name for display
-            totalScore: 0,
-            totalMarks: 0
-        };
-    }
-
-    studentMap[key].totalScore += score;
-    studentMap[key].totalMarks += totalMarks;
-});
-
-    const students = Object.values(studentMap);
-    const totalStudents = students.length;
-
-    let totalScoreSum = 0;
-    let totalMarksSum = 0;
-    let passCount = 0;
-
-    let highestScore = 0;
-    let highestTotal = 0;
+    const students = Object.values(map);
+    let passCount = 0, maxPct = 0, maxLabel = '';
 
     students.forEach(s => {
-
-        totalScoreSum += s.totalScore;
-        totalMarksSum += s.totalMarks;
-
-        // pass if >= 50%
-        if((s.totalScore / s.totalMarks) >= 0.5){
-            passCount++;
-        }
-
-        // track highest performer
-        if((s.totalScore / s.totalMarks) > (highestScore / (highestTotal || 1))){
-            highestScore = s.totalScore;
-            highestTotal = s.totalMarks;
-        }
+      const pct = s.score / s.total;
+      if (pct >= 0.5) passCount++;
+      if (pct > maxPct) {
+        maxPct  = pct;
+        maxLabel = `${s.score}/${s.total}`;
+      }
     });
 
-    // ✅ average as real marks
-    const avgScore = (totalScoreSum / totalStudents).toFixed(1);
-    const avgTotal = (totalMarksSum / totalStudents).toFixed(1);
+    // Average as percentage across all students
+    const avgPct = (students.reduce((a, s) => a + (s.score / s.total * 100), 0) / students.length).toFixed(1);
 
-    // ✅ update UI
-    document.getElementById('total').innerText = totalStudents;
-    document.getElementById('avg').innerText = `${avgScore}/${avgTotal}`;
-    document.getElementById('pass').innerText = `${passCount}/${totalStudents}`;
-    document.getElementById('max').innerText = `${highestScore}/${highestTotal}`;
-}
+    document.getElementById('total').textContent    = students.length;
+    document.getElementById('avg').textContent      = avgPct + '%';
+    document.getElementById('pass').textContent     = `${passCount}/${students.length}`;
+    document.getElementById('maxScore').textContent = maxLabel;
+  }
 
-function renderPagination(){
-
-    const totalPages = Math.ceil(filtered.length / rowsPerPage);
-    const container = document.getElementById('pagination');
-
-    container.innerHTML = '';
-
-    for(let i=1;i<=totalPages;i++){
-        container.innerHTML += `
-        <button onclick="goPage(${i})"
-        style="
-            margin:3px;
-            padding:6px 12px;
-            border-radius:6px;
-            border:none;
-            cursor:pointer;
-            font-weight:600;
-            background:${i===currentPage ? '#2ecc71' : '#ecf0f1'};
-            color:${i===currentPage ? '#fff' : '#333'};
-            transition:0.2s;
-        ">
-        ${i}
-        </button>`;
-    }
-}
-
-function renderTable(){
-    const table = document.getElementById('table');
-
-    table.innerHTML = '';
-
+  /*TABLE*/
+  function renderTable() {
+    const tbody = document.getElementById('table');
     const start = (currentPage - 1) * rowsPerPage;
-    const end = start + rowsPerPage;
-    const pageData = filtered.slice(start, end);
+    const page  = filtered.slice(start, start + rowsPerPage);
 
-    if(pageData.length === 0){
-        table.innerHTML = `
-        <tr>
-            <td colspan="3" style="text-align:center; padding:20px; color:#888;">
-                No results found
-            </td>
-        </tr>`;
-        renderPagination(); 
-        return;
+    if (!page.length) {
+      tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;padding:32px;color:var(--text-dim);">No results found</td></tr>`;
+      renderPagination();
+      return;
     }
 
-    pageData.forEach(s=>{
-        table.innerHTML += `
-        <tr>
-    <td>${s.student_id}</td>
-    <td>${s.student_name}</td>
-    <td>${s.subject}</td>
-    <td>${s.score}</td>
-        </tr>`;
-    });
+    tbody.innerHTML = page.map(s => {
+      const total = Math.max(Number(s.total) || 100, 1);   // guard divide-by-zero
+      const pct   = Math.round(Number(s.score) / total * 100);
+      const badge = pct >= 75 ? 'badge-green' : pct >= 50 ? 'badge-orange' : 'badge-red';
+      return `<tr>
+        <td style="font-family:var(--mono);font-size:0.82rem;color:var(--text-muted);">${s.student_id || '—'}</td>
+        <td><strong>${s.student_name}</strong></td>
+        <td>${s.subject}</td>
+        <td style="font-family:var(--mono);">${s.score}/${s.total}</td>
+        <td><span class="badge ${badge}">${pct}%</span></td>
+      </tr>`;
+    }).join('');
 
     renderPagination();
-}
+  }
 
-function goPage(page){
-    currentPage = page;
-    renderTable();
-}
+  /*PAGINATION*/
+  function renderPagination() {
+    const totalPages = Math.ceil(filtered.length / rowsPerPage);
+    document.getElementById('pagination').innerHTML =
+      Array.from({ length: totalPages }, (_, i) =>
+        `<button class="page-btn ${i + 1 === currentPage ? 'active' : ''}" onclick="goPage(${i + 1})">${i + 1}</button>`
+      ).join('');
+  }
 
-/* TOP STUDENTS */
-function topStudents(){
+  function goPage(p) { currentPage = p; renderTable(); }
 
-    const topDiv = document.getElementById('top');
-
-    const studentMap = {};
-
+  //TOP STUDENTS
+  function topStudents() {
+    const map = {};
     filtered.forEach(s => {
-        const key = s.student_id;
-
-        if(!studentMap[key]){
-            studentMap[key] = {
-                name: s.student_name,
-                totalScore: 0,
-                totalMarks: 0
-            };
-        }
-
-        studentMap[key].totalScore += Number(s.score);
-        studentMap[key].totalMarks += Number(s.total || 100);
+      const k = s.student_id;
+      if (!map[k]) map[k] = { name: s.student_name, score: 0, total: 0 };
+      map[k].score += Number(s.score);
+      map[k].total += Number(s.total || 100);
     });
 
-    const students = Object.values(studentMap)
-        .sort((a,b)=> (b.totalScore/b.totalMarks) - (a.totalScore/a.totalMarks))
-        .slice(0,5);
+    const top    = Object.values(map).sort((a, b) => (b.score / b.total) - (a.score / a.total)).slice(0, 5);
+    const medals = ['🥇', '🥈', '🥉', '🏅', '🏅'];
 
-    const medals = ["🥇","🥈","🥉","🏅","🏅"];
+    document.getElementById('top').innerHTML = top.length
+      ? top.map((s, i) => {
+          const pct = (s.score / Math.max(s.total, 1) * 100).toFixed(0);
+          return `<div style="padding:12px 20px;border-bottom:1px solid var(--border);">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:7px;">
+              <div style="font-weight:600;font-size:0.88rem;">${medals[i]} ${s.name}</div>
+              <span class="badge badge-green">${s.score}/${s.total}</span>
+            </div>
+            <div class="progress-bar">
+              <div class="progress-fill" style="width:${pct}%"></div>
+            </div>
+          </div>`;
+        }).join('')
+      : '<div class="empty-state"><div class="empty-text">No data</div></div>';
+  }
 
-    topDiv.innerHTML = '';
-
-    students.forEach((s,i)=>{
-
-        const percent = (s.totalScore / s.totalMarks) * 100;
-
-        topDiv.innerHTML += `
-        <div class="top-item">
-            <div>${medals[i]} ${s.name}</div>
-            <div><strong>${s.totalScore}/${s.totalMarks}</strong></div>
-        </div>
-        <div class="bar">
-            <div class="fill" style="width:${percent}%"></div>
-        </div>`;
-    });
-}
-/* CHART */
-function chart(){
-
-    const chartDiv = document.getElementById('chart');
-
-    const studentMap = {};
-
-    // ✅ GROUP BY ID
-    filtered.forEach(s=>{
-        const key = s.student_id;
-
-        if(!studentMap[key]){
-            studentMap[key] = {
-                totalScore: 0,
-                totalMarks: 0
-            };
-        }
-
-        studentMap[key].totalScore += Number(s.score);
-        studentMap[key].totalMarks += Number(s.total || 100);
+  /*CHART*/
+  function chart() {
+    const map = {};
+    filtered.forEach(s => {
+      const k = s.student_id;
+      if (!map[k]) map[k] = { score: 0, total: 0 };
+      map[k].score += Number(s.score);
+      map[k].total += Number(s.total || 100);
     });
 
-    const students = Object.values(studentMap);
-
-    let ranges = [0,0,0,0,0];
-
-    students.forEach(s=>{
-        let percent = (s.totalScore / s.totalMarks) * 100;
-
-        if(percent <= 40) ranges[0]++;
-        else if(percent <= 60) ranges[1]++;
-        else if(percent <= 75) ranges[2]++;
-        else if(percent <= 90) ranges[3]++;
-        else ranges[4]++;
+    const ranges = [0, 0, 0, 0, 0];
+    Object.values(map).forEach(s => {
+      const p = s.score / Math.max(s.total, 1) * 100;
+      if      (p <= 40) ranges[0]++;
+      else if (p <= 60) ranges[1]++;
+      else if (p <= 75) ranges[2]++;
+      else if (p <= 90) ranges[3]++;
+      else              ranges[4]++;
     });
 
     const labels = [
-        "❌ Fail (0-40%)",
-        "⚠️ Average (41-60%)",
-        "👍 Good (61-75%)",
-        "💪 Very Good (76-90%)",
-        "🏆 Excellent (91-100%)"
+      '❌ Fail (0–40%)',
+      '⚠️ Average (41–60%)',
+      '👍 Good (61–75%)',
+      '💪 Very Good (76–90%)',
+      '🏆 Excellent (91–100%)'
     ];
+    const colors = [
+      'var(--red)', 'var(--orange)', 'var(--blue)', 'var(--green)', '#39d353'
+    ];
+    const maxVal = Math.max(...ranges, 1);  // guard all-zero case
 
-    const maxVal = Math.max(...ranges);
+    document.getElementById('chart').innerHTML = ranges.map((v, i) => `
+      <div class="chart-row">
+        <div class="chart-label-row">
+          <span>${labels[i]}</span>
+          <span style="font-family:var(--mono);font-weight:700;">${v}</span>
+        </div>
+        <div class="progress-bar">
+          <div class="progress-fill" style="width:${(v / maxVal) * 100}%;background:${colors[i]};"></div>
+        </div>
+      </div>`).join('');
+  }
 
-    chartDiv.innerHTML = '';
-
-    ranges.forEach((val,i)=>{
-
-        let percentWidth = maxVal ? (val/maxVal)*100 : 0;
-
-        chartDiv.innerHTML += `
-        <div class="chart-row">
-            <div style="display:flex; justify-content:space-between;">
-                <span>${labels[i]}</span>
-                <span>${val} students</span>
-            </div>
-            <div class="bar">
-                <div class="fill" style="width:${percentWidth}%; transition:1s;"></div>
-            </div>
-        </div>`;
-    });
-}
-loadData();
-
+  loadData();
+  
 </script>
-
 </body>
 </html>
