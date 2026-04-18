@@ -1,564 +1,469 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-<meta charset="UTF-8">
-<title>Manage Exams</title>
-
-<style>
-body { margin:0; font-family:Segoe UI; background:#f4f7fb; }
-.container { display:flex; padding:0 20px 20px; gap:20px; }
-
-.left, .right {
-    background:white;
-    padding:20px;
-    border-radius:10px;
-    box-shadow:0 4px 10px rgba(0,0,0,.05);
-}
-
-.left { width:25%; }
-.right { flex:1; }
-
-.btn { padding:8px 14px; border:none; border-radius:6px; cursor:pointer; }
-.green { background:#22c55e; color:white; }
-.blue { background:#3b82f6; color:white; }
-.input { width:100%; padding:8px; margin-bottom:10px; }
-
-.q-card {
-    padding:10px;
-    margin-bottom:8px;
-    background:#f1f5f9;
-    border-radius:6px;
-}
-.exam-list {
-    margin-top:15px;
-}
-.exam-item {
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    padding:12px;
-    margin-bottom:10px;
-    border-radius:8px;
-    background:#e2e8f0;
-    cursor:pointer;
-    font-weight:600;
-    transition:0.3s;
-}
-
-.exam-item:hover {
-    background:#cbd5f5;
-}
-
-.exam-item.active {
-    background:#3b82f6;
-    color:white;
-}
-.del-btn {
-    background:#ef4444;
-    color:white;
-    border:none;
-    padding:4px 8px;
-    border-radius:5px;
-    cursor:pointer;
-    float:right;
-}
-
-.del-btn:hover {
-    background:#dc2626;
-}
-.card {
-    background: white;
-    padding: 20px;
-    border-radius: 12px;
-    margin-bottom: 20px;
-    box-shadow: 0 6px 15px rgba(0,0,0,0.05);
-}
-
-.card-header {
-    margin-bottom: 20px;
-}
-
-.card h3 {
-    margin-bottom: 15px;
-    color: #334155;
-}
-
-.grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 15px;
-}
-
-.grid div {
-    display: flex;
-    flex-direction: column;
-}
-
-label {
-    font-size: 13px;
-    margin-bottom: 5px;
-    color: #64748b;
-}
-
-.input {
-    padding: 10px;
-    border-radius: 6px;
-    border: 1px solid #d1d5db;
-    transition: 0.2s;
-}
-
-.input:focus {
-    border-color: #3b82f6;
-    outline: none;
-}
-
-.primary-btn {
-    background: linear-gradient(135deg, #3b82f6, #6366f1);
-    color: white;
-    width: 100%;
-    margin-top: 10px;
-}
-
-.primary-btn:hover {
-    opacity: 0.9;
-}
-
-.submit-btn {
-    width: 100%;
-    padding: 12px;
-    background: #22c55e;
-    color: white;
-    font-weight: bold;
-    border-radius: 10px;
-}
-.exam-title {
-    display: block;
-    width: 96%;
-
-    padding: 12px 18px;
-
-    font-size: 20px;
-    font-weight: 600;
-
-    color: #1e293b;
-
-    background: linear-gradient(90deg, #e0edff, #f8fafc);
-
-    border-left: 5px solid #3b82f6;   /* 🔥 highlight line */
-
-    border-radius: 8px;
-
-    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-}
-.title-bar {
-    padding: 15px 25px;
-    border-radius: 10px;
-    font-size: 20px;
-    font-weight: 600;
-    color: white;
-    background: #4a69bd;   /* 🔵 BLUE */
-    margin: 20px;
-}
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="style.css">
+  <title>Manage Exams — EduQuiz</title>
 </head>
-
 <body>
-   <div class="title-bar">📋 Manage Exams</div>
 
-<div class="container">
+<nav class="topnav">
+  <a href="admin.html" class="topnav-brand">
+    <div class="brand-icon">📚</div>
+    <span class="brand-name">Edu<span>Quiz</span></span>
+  </a>
+  <div class="topnav-right">
+    <a href="admin.html" class="btn btn-ghost btn-sm">← Dashboard</a>
+  </div>
+</nav>
 
-<!-- LEFT -->
-<div class="left">
-    <h3>Exams</h3>
-    <button class="btn green" onclick="createExam()">+ Create Exam</button>
-<div id="examList" class="exam-list"></div>
-</div>
-
-<!-- RIGHT -->
-<div class="right">
-
-  <div class="card-header">
-    <div id="examTitle" class="exam-title">No Exam Selected</div>
-</div>
-
-    <!-- SCHEDULE CARD -->
-    <div id="scheduleBox" class="card" style="display:none;">
-        <h3>📅 Exam Schedule</h3>
-
-        <div class="grid">
-            <div>
-                <label>Start Time</label>
-                <input type="datetime-local" id="startTime" class="input">
-            </div>
-
-            <div>
-                <label>End Time</label>
-                <input type="datetime-local" id="endTime" class="input">
-            </div>
-
-            <div>
-                <label>Duration (minutes)</label>
-                <input type="number" id="duration" class="input">
-            </div>
-        </div>
+<div class="page-wrapper">
+  <div class="container" style="max-width:1300px;">
+    <div class="page-title-row">
+      <div>
+        <div class="page-title">📋 Manage <span>Exams</span></div>
+        <div class="page-subtitle">Create exams, set schedule, then add questions.</div>
+      </div>
+      <button class="btn btn-primary" onclick="createExam()">+ New Exam</button>
     </div>
 
-    <!-- QUESTION CARD -->
-    <div id="questionBox" class="card" style="display:none;">
-
-        <h3 id="qLabel">Question 1</h3>
-
-        <select id="qType" class="input" onchange="toggleType()">
-            <option value="mcq">MCQ</option>
-            <option value="general">General</option>
-        </select>
-
-        <input id="qText" class="input" placeholder="Enter question...">
-
-        <div id="mcqOptions">
-            <input id="a" class="input" placeholder="Option A">
-            <input id="b" class="input" placeholder="Option B">
-            <input id="c" class="input" placeholder="Option C">
-            <input id="d" class="input" placeholder="Option D">
-
-            <select id="correct" class="input">
-                <option>A</option>
-                <option>B</option>
-                <option>C</option>
-                <option>D</option>
-            </select>
+    <div class="two-col">
+      <!-- LEFT: Exam List -->
+      <div>
+        <div class="panel" style="position:sticky;top:80px;">
+          <div class="panel-header">
+            <div class="panel-header-left">Exams</div>
+            <span class="badge badge-blue" id="examCountBadge">0</span>
+          </div>
+          <div style="padding:12px;" id="examList">
+            <div class="empty-state" style="padding:24px;"><div class="empty-text">No exams yet</div></div>
+          </div>
         </div>
+      </div>
 
-        <input id="generalAns" class="input" placeholder="Correct Answer" style="display:none;">
-
-        <button class="btn primary-btn" onclick="addQuestion()">Add Question</button>
-
+      <!-- RIGHT: Editor -->
+      <div>
+        <div id="editorArea">
+          <div class="panel">
+            <div style="padding:48px;text-align:center;color:var(--text-dim);">
+              <div style="font-size:40px;margin-bottom:12px;">📋</div>
+              <div style="font-weight:600;margin-bottom:4px;">Select an exam</div>
+              <div style="font-size:0.85rem;">Choose from the left panel or create a new exam</div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
-
-    <!-- QUESTION LIST -->
-<div class="card" id="questionListBox" style="display:none;">
-    <h3>📋 Added Questions</h3>
-    <div id="questionList"></div>
+  </div>
 </div>
 
-<div id="submitBox" style="display:none;">
-    <button class="btn submit-btn" onclick="submitExam()">Submit Exam</button>
-</div>
-
-</div> <!-- RIGHT END -->
-</div> <!-- CONTAINER END -->
-
-    <!-- QUESTION CREATION -->
+<div id="toast"></div>
 
 <script>
-let exams = [];
-let questions = [];
-let currentExam = "";
-let qCount = 1;
-let editingId = null;
+let exams = [], questions = [], currentExam = '', editingId = null, qCount = 1;
+let activeStep = 'schedule'; // 'schedule' | 'questions'
 
-async function createExam(){
-    const names = prompt("Enter exam names (comma separated):");
-    if(!names) return;
-
-    const list = names.split(',').map(n => n.trim()).filter(n => n);
-
-    for(const name of list){
-        await fetch('/api/create-exam', {
-            method: 'POST',
-            headers: {'Content-Type':'application/json'},
-            body: JSON.stringify({ subject: name })
-        });
-    }
-
-    loadExams(); // reload from DB
+function toast(msg, type='success') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'show ' + type;
+  setTimeout(() => t.className = '', 3000);
 }
 
-function renderExams(){
-    const box = document.getElementById('examList');
-    box.innerHTML = '';
+//EXAM LIST 
 
-    exams.forEach(obj => {
-        const e = obj.name;
-        const count = obj.count;
+async function loadExams() {
+  const res = await fetch('/api/get-exams');
+  const data = await res.json();
+  exams = data.map(e => ({ name: e.subject, count: e.qCount }));
+  document.getElementById('examCountBadge').textContent = exams.length;
+  renderExamList();
+}
 
-        const isActive = (e === currentExam) ? "active" : "";
+function renderExamList() {
+  const box = document.getElementById('examList');
+  if (!exams.length) {
+    box.innerHTML = '<div class="empty-state" style="padding:24px;"><div class="empty-text">No exams yet</div></div>';
+    return;
+  }
+  box.innerHTML = exams.map(e => `
+    <div class="exam-item ${e.name===currentExam?'active':''}" onclick="selectExam('${e.name}')">
+      <div>
+        <div class="exam-item-name">📘 ${e.name}</div>
+        <div class="exam-item-meta">${e.count} questions</div>
+      </div>
+      <button class="btn btn-danger btn-sm" onclick="deleteExam(event,'${e.name}')">✕</button>
+    </div>`).join('');
+}
 
-        box.innerHTML += `
-        <div class="exam-item ${isActive}" onclick="selectExam('${e}')">
-            <div>
-                📘 ${e}
-                <small style="display:block;color:gray;">${count} Questions</small>
-            </div>
-            <button class="del-btn" onclick="deleteExam(event, '${e}')">✖</button>
+async function createExam() {
+  const names = prompt('Exam name(s) — comma-separated for multiple:');
+  if (!names) return;
+  const list = names.split(',').map(n => n.trim()).filter(Boolean);
+  for (const n of list) {
+    await fetch('/api/create-exam', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ subject: n })
+    });
+  }
+  toast('Created ' + list.length + ' exam(s)');
+  await loadExams();
+  // Auto-select and land on schedule step
+  if (list.length === 1) selectExam(list[0]);
+}
+
+async function deleteExam(e, name) {
+  e.stopPropagation();
+  if (!confirm('Delete "' + name + '" and all its questions?')) return;
+  const res = await fetch('/api/delete-exam', {
+    method: 'DELETE',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ subject: name })
+  });
+  const data = await res.json();
+  if (data.success) {
+    toast('Deleted');
+    if (currentExam === name) {
+      currentExam = '';
+      document.getElementById('editorArea').innerHTML = `
+        <div class="panel">
+          <div style="padding:48px;text-align:center;color:var(--text-dim);">
+            <div style="font-size:40px;margin-bottom:12px;">📋</div>
+            <div style="font-weight:600;margin-bottom:4px;">Select an exam</div>
+          </div>
         </div>`;
-    });
-}
-async function loadExams(){
-    const res = await fetch('/api/get-exams');
-    const data = await res.json();
-
-    exams = data.map(e => ({
-        name: e.subject,
-        count: e.qCount
-    }));
-
-    renderExams();
-}
-
-async function deleteExam(event, name){
-    event.stopPropagation();
-
-    if(!confirm("Delete this exam permanently?")) return;
-
-    const res = await fetch('/api/delete-exam', {
-        method: 'DELETE',
-        headers: {'Content-Type':'application/json'},
-        body: JSON.stringify({ subject: name })
-    });
-
-    const data = await res.json();
-
-    if(data.success){
-        alert("Deleted successfully");
-        loadExams();
-    } else {
-        alert("Delete failed");
     }
+    loadExams();
+  } else {
+    toast('Delete failed', 'error');
+  }
 }
-async function loadQuestions(subject){
-    const res = await fetch(`/api/get-questions?subject=${subject}`);
-    const data = await res.json();
 
-    questions = data;
+//SELECT EXAM 
 
-    const list = document.getElementById('questionList');
-    list.innerHTML = '';
+async function selectExam(name) {
+  currentExam = name;
+  editingId = null;
+  activeStep = 'schedule'; // always start at schedule when switching exams
+  await loadQuestions(name);
+  const schedule = await loadSchedule(name);
+  renderEditor(schedule);
+  renderExamList();
+}
 
-    let count = 1;
+//DATA LOADERS 
 
-    data.forEach((q, i) => {
-       list.innerHTML += `
-<div class="q-card">
-    Question ${count}: ${q.question_text}
+async function loadQuestions(subject) {
+  const res = await fetch('/api/get-questions?subject=' + subject);
+  questions = await res.json();
+  qCount = questions.length + 1;
+}
 
-    <div style="float:right;">
-       <button onclick="editSavedQuestionByIndex(${i})">Edit</button>
-        <button onclick="deleteQuestion(${q.id})" style="background:red;color:white;margin-left:5px;">Delete</button>
+async function loadSchedule(subject) {
+  try {
+    const res = await fetch('/api/get-schedule/' + subject);
+    return await res.json();
+  } catch(e) {
+    return null;
+  }
+}
+
+//RENDER EDITOR
+
+function renderEditor(schedule) {
+  const toLocal = dt => dt ? new Date(dt).toISOString().slice(0, 16) : '';
+  const startVal = schedule ? toLocal(schedule.start_time) : '';
+  const endVal   = schedule ? toLocal(schedule.end_time)   : '';
+  const durVal   = schedule ? (schedule.timer || '')        : '';
+  const hasSchedule = !!(startVal && endVal && durVal);
+
+  const scheduleTabStyle = `
+    flex:1;padding:14px 20px;cursor:pointer;font-weight:600;font-size:0.9rem;text-align:center;
+    background:${activeStep==='schedule'?'var(--primary,#3b82f6)':'#f1f5f9'};
+    color:${activeStep==='schedule'?'white':'#64748b'};
+    border-right:1px solid #e2e8f0;transition:0.2s;`;
+
+  const questionTabStyle = `
+    flex:1;padding:14px 20px;
+    cursor:${hasSchedule?'pointer':'not-allowed'};
+    font-weight:600;font-size:0.9rem;text-align:center;
+    background:${activeStep==='questions'?'var(--primary,#3b82f6)':'#f1f5f9'};
+    color:${activeStep==='questions'?'white':hasSchedule?'#64748b':'#b0bec5'};
+    transition:0.2s;`;
+
+  const area = document.getElementById('editorArea');
+  area.innerHTML = `
+
+    <!-- STEP TABS -->
+    <div style="display:flex;margin-bottom:20px;border-radius:10px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.08);">
+      <div style="${scheduleTabStyle}" onclick="switchStep('schedule')">
+        📅 Step 1 — Schedule
+        ${hasSchedule ? '<span style="margin-left:6px;font-size:0.75rem;opacity:0.85;">✔ Set</span>' : ''}
+      </div>
+      <div style="${questionTabStyle}"
+           onclick="${hasSchedule ? "switchStep('questions')" : "toast('Set and save the schedule first!','error')"}">
+        ❓ Step 2 — Questions
+        <span class="badge badge-blue" style="margin-left:6px;">${questions.length}</span>
+      </div>
     </div>
 
-</div>`;
-        count++;
-    });
+    <!-- STEP 1: SCHEDULE -->
+    <div id="stepContent_schedule" style="display:${activeStep==='schedule'?'block':'none'};">
+      <div class="panel" style="margin-bottom:16px;">
+        <div class="panel-header">
+          <div class="panel-header-left">📅 Exam Schedule — <strong style="color:var(--text)">${currentExam}</strong></div>
+        </div>
+        <div style="padding:20px;">
+          <p style="margin:0 0 16px;color:#64748b;font-size:0.9rem;">
+            Set when students can access this exam. This applies to the whole exam — you can only change it here.
+          </p>
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-bottom:20px;">
+            <div class="form-group">
+              <label class="form-label">Start Time</label>
+              <input type="datetime-local" id="startTime" class="input" value="${startVal}">
+            </div>
+            <div class="form-group">
+              <label class="form-label">End Time</label>
+              <input type="datetime-local" id="endTime" class="input" value="${endVal}">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Duration (minutes)</label>
+              <input type="number" id="duration" class="input" placeholder="e.g. 30" value="${durVal}">
+            </div>
+          </div>
+          <button class="btn btn-primary" onclick="saveSchedule()" style="width:100%;justify-content:center;padding:13px;font-size:0.95rem;">
+            💾 Save Schedule &amp; Continue to Questions →
+          </button>
+        </div>
+      </div>
+    </div>
 
-    qCount = count;
-    document.getElementById('qLabel').innerText = "Question " + qCount;
-}
-function editSavedQuestionByIndex(index){
-    const q = questions[index];
-    editSavedQuestion(q);
-}
+    <!-- STEP 2: QUESTIONS -->
+    <div id="stepContent_questions" style="display:${activeStep==='questions'?'block':'none'};">
 
-function selectExam(name){
-    currentExam = name;
-    qCount = 1;
+      <!-- Schedule summary bar -->
+      <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;padding:12px 16px;margin-bottom:16px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">
+        <div style="font-size:0.85rem;color:#166534;">
+          📅 <strong>Schedule:</strong>
+          ${startVal ? new Date(startVal).toLocaleString() : '—'} &rarr;
+          ${endVal   ? new Date(endVal).toLocaleString()   : '—'}
+          &nbsp;·&nbsp; ${durVal ? durVal + ' mins' : '—'}
+        </div>
+        <button class="btn btn-ghost btn-sm" onclick="switchStep('schedule')">Edit Schedule</button>
+      </div>
 
-    document.getElementById('examTitle').innerText = "📘 " + name;
-    document.getElementById('scheduleBox').style.display='block';
-    document.getElementById('questionBox').style.display='block';
-    document.getElementById('questionList').innerHTML='';
-    document.getElementById('questionListBox').style.display = 'block';
-    document.getElementById('qLabel').innerText = "Question 1";
-    document.getElementById('submitBox').style.display = 'block';
+      <!-- Add / Edit question form -->
+      <div class="panel" style="margin-bottom:16px;">
+        <div class="panel-header">
+          <div class="panel-header-left">
+            ${editingId ? '✏️ Edit Question' : '➕ Add Question'}
+            <span class="badge badge-blue" style="margin-left:8px;">Q${qCount}</span>
+          </div>
+        </div>
+        <div style="padding:16px;">
+          <div class="form-group">
+            <label class="form-label">Question Type</label>
+            <select id="qType" class="select" onchange="toggleType()">
+              <option value="mcq">MCQ</option>
+              <option value="general">Short Answer</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Question Text</label>
+            <textarea id="qText" class="textarea" placeholder="Enter the question..."></textarea>
+          </div>
+          <div id="mcqOptions">
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+              <div class="form-group"><label class="form-label">Option A</label><input id="optA" class="input" placeholder="Option A"></div>
+              <div class="form-group"><label class="form-label">Option B</label><input id="optB" class="input" placeholder="Option B"></div>
+              <div class="form-group"><label class="form-label">Option C</label><input id="optC" class="input" placeholder="Option C"></div>
+              <div class="form-group"><label class="form-label">Option D</label><input id="optD" class="input" placeholder="Option D"></div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Correct Answer</label>
+              <select id="correct" class="select"><option>A</option><option>B</option><option>C</option><option>D</option></select>
+            </div>
+          </div>
+          <div id="generalAns" style="display:none;">
+            <div class="form-group">
+              <label class="form-label">Correct Answer</label>
+              <input id="correctGeneral" class="input" placeholder="Type the correct answer">
+            </div>
+          </div>
+          <button class="btn btn-primary" onclick="addQuestion()" style="width:100%;justify-content:center;">
+            ${editingId ? '💾 Update Question' : '+ Add Question'}
+          </button>
+          ${editingId ? `<button class="btn btn-ghost" onclick="cancelEdit()" style="width:100%;justify-content:center;margin-top:8px;">Cancel Edit</button>` : ''}
+        </div>
+      </div>
 
-     loadQuestions(name);
-    renderExams(); //  refresh UI highlight
-}
+      <!-- Question list -->
+      <div class="panel" style="margin-bottom:16px;">
+        <div class="panel-header">
+          <div class="panel-header-left">📋 Questions <span class="badge badge-blue">${questions.length}</span></div>
+        </div>
+        <div id="questionList">
+          ${questions.length
+            ? questions.map((q, i) => `
+                <div class="q-card">
+                  <span class="q-number">Q${i+1}</span>
+                  <span class="q-text">${q.question_text}</span>
+                  <div style="display:flex;gap:6px;flex-shrink:0;">
+                    <button class="btn btn-ghost btn-sm" onclick="editSavedQ(${i})">Edit</button>
+                    <button class="btn btn-danger btn-sm" onclick="deleteQ(${q.id})">Del</button>
+                  </div>
+                </div>`).join('')
+            : '<div class="empty-state" style="padding:24px;"><div class="empty-text">No questions yet — add your first question above</div></div>'}
+        </div>
+      </div>
 
-function toggleType(){
-    const t = qType.value;
-
-    document.getElementById('mcqOptions').style.display =
-        t === 'mcq' ? 'block' : 'none';
-
-    document.getElementById('generalAns').style.display =
-        t === 'general' ? 'block' : 'none';
-
-    // reset values
-    a.value = b.value = c.value = d.value = '';
-    generalAns.value = '';
-}
-async function addQuestion(){
-
-    if(editingId){
-
-        const q = {
-            type: qType.value,
-            text: qText.value,
-            a: a.value,
-            b: b.value,
-            c: c.value,
-            d: d.value,
-            correct: qType.value==='mcq'?correct.value:generalAns.value
-        };
-
-        await fetch('/api/update-question', {
-            method: 'PUT',
-            headers: {'Content-Type':'application/json'},
-            body: JSON.stringify({
-                id: editingId,
-                question_text: q.text,
-                a: q.a,
-                b: q.b,
-                c: q.c,
-                d: q.d,
-                correct: q.correct,
-                type: q.type
-            })
-        });
-
-        alert("Question updated!");
-
-        editingId = null;
-        loadQuestions(currentExam);
-        qText.value = a.value = b.value = c.value = d.value = generalAns.value = '';
-        return;
-    }
-
-    const q = {
-        type: qType.value,
-        text: qText.value,
-        a: a.value,
-        b: b.value,
-        c: c.value,
-        d: d.value,
-        correct: qType.value==='mcq'?correct.value:generalAns.value
-    };
-
-    questions.push(q);
-
-    document.getElementById('questionList').innerHTML +=
-    `<div class="q-card">
-        Question ${qCount}: ${q.text}
-        <button onclick="editQuestion(${qCount-1})" style="float:right;">Edit</button>
+      <!-- Publish -->
+      <button class="btn btn-success" onclick="publishExam()" style="width:100%;justify-content:center;padding:14px;font-size:1rem;">
+        ✅ Save &amp; Publish Exam
+      </button>
     </div>`;
-
-    qCount++;
-    qLabel.innerText = "Question " + qCount;
-
-    qText.value = a.value = b.value = c.value = d.value = generalAns.value = '';
 }
-function editQuestion(index){
-    const q = questions[index];
 
-    qType.value = q.type;
-    toggleType();
+//STEP SWITCHING 
 
-    qText.value = q.text;
-    a.value = q.a || '';
-    b.value = q.b || '';
-    c.value = q.c || '';
-    d.value = q.d || '';
-
-    if(q.type === 'mcq'){
-        correct.value = q.correct;
-    } else {
-        generalAns.value = q.correct;
-    }
-
-    questions.splice(index,1);
-    qCount--;
-    qLabel.innerText = "Question " + qCount;
+async function switchStep(step) {
+  activeStep = step;
+  const schedule = await loadSchedule(currentExam);
+  renderEditor(schedule);
 }
-function editSavedQuestion(q){
-    editingId = q.id;
 
-    // set type
-    qType.value = q.type;
-    toggleType();
+//SCHEDULE
 
-    // set question text
-    qText.value = q.question_text;
+async function saveSchedule() {
+  const start = document.getElementById('startTime').value;
+  const end   = document.getElementById('endTime').value;
+  const dur   = document.getElementById('duration').value;
 
-    // set options
- a.value = q.a || '';
-b.value = q.b || '';
-c.value = q.c || '';
-d.value = q.d || '';
+  if (!start || !end || !dur) {
+    toast('Please fill in all schedule fields!', 'error');
+    return;
+  }
+  if (new Date(end) <= new Date(start)) {
+    toast('End time must be after start time!', 'error');
+    return;
+  }
 
-    // set correct answer
-    if(q.type === 'mcq'){
-correct.value = q.correct;
-    } else {
-generalAns.value = q.correct;
-    }
+  await fetch('/api/set-schedule', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ subject: currentExam, start, end, timer: dur })
+  });
 
-    // scroll to form
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+  toast('Schedule saved!');
+  activeStep = 'questions';
+  const schedule = await loadSchedule(currentExam);
+  renderEditor(schedule);
 }
-async function deleteQuestion(id){
 
-    if(!confirm("Delete this question?")) return;
+//QUESTIONS
 
-    const res = await fetch('/api/delete-question', {
-        method: 'DELETE',
-        headers: {'Content-Type':'application/json'},
-        body: JSON.stringify({ id: id })
+function toggleType() {
+  const t = document.getElementById('qType').value;
+  document.getElementById('mcqOptions').style.display = t === 'mcq' ? 'block' : 'none';
+  document.getElementById('generalAns').style.display = t === 'general' ? 'block' : 'none';
+}
+
+async function addQuestion() {
+  const type = document.getElementById('qType').value;
+  const text = document.getElementById('qText').value.trim();
+  if (!text) { toast('Enter a question!', 'error'); return; }
+
+  const optA = document.getElementById('optA')?.value || '';
+  const optB = document.getElementById('optB')?.value || '';
+  const optC = document.getElementById('optC')?.value || '';
+  const optD = document.getElementById('optD')?.value || '';
+  const correct = type === 'mcq'
+    ? document.getElementById('correct').value
+    : document.getElementById('correctGeneral').value;
+
+  if (editingId) {
+    await fetch('/api/update-question', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id: editingId, question_text: text, a: optA, b: optB, c: optC, d: optD, correct, type })
     });
-
-    const data = await res.json();
-
-    if(data.success){
-        alert("Deleted successfully");
-
-        // reload questions + FIX numbering automatically
-        loadQuestions(currentExam);
-
-    } else {
-        alert("Delete failed");
-    }
-}
-
-async function submitExam(){
-
-    if(!startTime.value || !endTime.value || !duration.value){
-        alert("Please set exam schedule");
-        return;
-    }
-
-    // 1️⃣ Save schedule
-    await fetch('/api/set-schedule', {
-        method: 'POST',
-        headers: {'Content-Type':'application/json'},
-        body: JSON.stringify({
-            subject: currentExam,
-            start: startTime.value,
-            end: endTime.value,
-            timer: duration.value
-        })
+    toast('Question updated');
+    editingId = null;
+  } else {
+    await fetch('/api/questions', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ subject: currentExam, question_text: text, a: optA, b: optB, c: optC, d: optD, correct, type })
     });
+    toast('Question added');
+  }
 
-    // 2️⃣ Save questions
-    for(const q of questions){
-        await fetch('/api/questions', {
-            method: 'POST',
-            headers: {'Content-Type':'application/json'},
-            body: JSON.stringify({
-                subject: currentExam,
-                question_text: q.text,
-                a: q.a,
-                b: q.b,
-                c: q.c,
-                d: q.d,
-                correct: q.correct,
-                type: q.type
-            })
-        });
-    }
-
-    alert("Exam created successfully!");
-    location.reload();
+  await loadQuestions(currentExam);
+  activeStep = 'questions';
+  const schedule = await loadSchedule(currentExam);
+  renderEditor(schedule);
 }
+
+async function editSavedQ(idx) {
+  const q = questions[idx];
+  editingId = q.id;
+  activeStep = 'questions';
+  const schedule = await loadSchedule(currentExam);
+  renderEditor(schedule);
+
+  document.getElementById('qType').value = q.type || 'mcq';
+  toggleType();
+  document.getElementById('qText').value = q.question_text;
+  if (q.type !== 'general') {
+    document.getElementById('optA').value = q.a || '';
+    document.getElementById('optB').value = q.b || '';
+    document.getElementById('optC').value = q.c || '';
+    document.getElementById('optD').value = q.d || '';
+    document.getElementById('correct').value = q.correct || 'A';
+  } else {
+    document.getElementById('correctGeneral').value = q.correct || '';
+  }
+}
+
+async function cancelEdit() {
+  editingId = null;
+  activeStep = 'questions';
+  const schedule = await loadSchedule(currentExam);
+  renderEditor(schedule);
+}
+
+async function deleteQ(id) {
+  if (!confirm('Delete this question?')) return;
+  const res = await fetch('/api/delete-question', {
+    method: 'DELETE',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ id })
+  });
+  const data = await res.json();
+  if (data.success) {
+    toast('Deleted');
+    await loadQuestions(currentExam);
+    activeStep = 'questions';
+    const schedule = await loadSchedule(currentExam);
+    renderEditor(schedule);
+  } else {
+    toast('Delete failed', 'error');
+  }
+}
+
+//PUBLISH
+
+async function publishExam() {
+  if (questions.length === 0) {
+    toast('Add at least one question before publishing!', 'error');
+    return;
+  }
+  toast('Exam published successfully! ✅');
+  await loadExams(); // refresh question count in sidebar
+}
+
 loadExams();
 </script>
 
