@@ -1,135 +1,139 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-<meta charset="UTF-8">
-<title>Student Management</title>
-
-<style>
-body { margin:0; font-family:Segoe UI; background:#f4f7fb; }
-
-.container {
-    padding:20px;
-}
-
-/* HEADER BAR */
-.title {
-    padding:15px 20px;
-    border-radius:12px;
-    font-size:20px;
-    font-weight:bold;
-    color:white;
-    background: linear-gradient(135deg,#3b82f6);
-    margin-bottom:20px;
-}
-
-/* TABLE */
-.card {
-    background:white;
-    padding:20px;
-    border-radius:12px;
-    box-shadow:0 4px 10px rgba(0,0,0,.05);
-}
-
-table {
-    width:100%;
-    border-collapse:collapse;
-}
-
-th, td {
-    padding:10px;
-    border-bottom:1px solid #eee;
-    text-align:left;
-}
-
-th {
-    background:#f1f5f9;
-}
-
-/* BUTTON */
-.btn {
-    padding:8px 12px;
-    border:none;
-    border-radius:6px;
-    background:#22c55e;
-    color:white;
-    cursor:pointer;
-}
-
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="style.css">
+  <title>Student Management — EduQuiz</title>
 </head>
-
 <body>
 
-<div class="container">
+<nav class="topnav">
+  <a href="admin.html" class="topnav-brand">
+    <div class="brand-icon">📚</div>
+    <span class="brand-name">Edu<span>Quiz</span></span>
+  </a>
+  <div class="topnav-right">
+    <a href="admin.html" class="btn btn-ghost btn-sm">← Dashboard</a>
+  </div>
+</nav>
 
-<div class="title">👥 Student Management</div>
+<div class="page-wrapper">
+  <div class="container">
+    <div class="page-title-row">
+      <div>
+        <div class="page-title">👥 Student <span>Management</span></div>
+        <div class="page-subtitle">View and manually edit student exam scores.</div>
+      </div>
+      <button class="btn btn-success" onclick="assignMarks()">💾 Save Selected</button>
+    </div>
 
-<div class="card">
-    <table>
-        <thead>
+    <div class="panel">
+      <div class="panel-header">
+        <div class="panel-header-left">Exam Results <span class="badge badge-blue" id="totalCount" style="margin-left:6px;">0</span></div>
+        <div class="search-bar" style="width:220px;">
+          <span style="color:var(--text-dim);">🔍</span>
+          <input type="text" id="searchInput" placeholder="Search student..." oninput="filterTable()">
+        </div>
+      </div>
+      <div style="overflow-x:auto;">
+        <table class="data-table" id="mainTable">
+          <thead>
             <tr>
-                <th>Select</th>
-                <th>Student ID</th>
-                <th>Name</th>
-                <th>Exam</th>
-                <th>Score</th>
+              <th style="width:40px;"><input type="checkbox" id="selectAll" onchange="toggleAll(this)"></th>
+              <th>Student ID</th>
+              <th>Name</th>
+              <th>Subject</th>
+              <th>Date</th>
+              <th>Score</th>
+              <th>%</th>
             </tr>
-        </thead>
-        <tbody id="studentTable"></tbody>
-    </table>
-
-    <br>
-    <button class="btn" onclick="assignMarks()">Assign Marks</button>
+          </thead>
+          <tbody id="studentTable">
+            <tr><td colspan="7" style="text-align:center;padding:40px;color:var(--text-dim);">Loading...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
 </div>
 
-</div>
+<div id="toast"></div>
 
 <script>
-let students = [];
+let allStudents = [];
 
-async function loadStudents(){
-    const res = await fetch('/api/get-all-results');
-    const data = await res.json();
-
-    students = data;
-
-    const table = document.getElementById('studentTable');
-    table.innerHTML = '';
-
-    data.forEach(s=>{
-        table.innerHTML += `
-        <tr>
-            <td><input type="checkbox" value="${s.id}"></td>
-            <td>${s.student_id || s.id}</td>
-            <td>${s.student_name}</td>
-            <td>${s.subject}</td>
-            <td>
-                <input type="number" id="score-${s.id}" value="${s.score}" style="width:60px;">
-            </td>
-        </tr>`;
-    });
+function toast(msg, type='success') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'show ' + type;
+  setTimeout(() => t.className = '', 3000);
 }
 
-async function assignMarks(){
-    const selected = document.querySelectorAll('input[type=checkbox]:checked');
+function toggleAll(cb) {
+  document.querySelectorAll('#studentTable input[type=checkbox]').forEach(c => c.checked = cb.checked);
+}
 
-    for(const box of selected){
-        const id = box.value;
-        const score = document.getElementById('score-'+id).value;
+function filterTable() {
+  const q = document.getElementById('searchInput').value.toLowerCase();
+  renderTable(allStudents.filter(s => s.student_name.toLowerCase().includes(q) || (s.student_id||'').toLowerCase().includes(q)));
+}
 
-        await fetch('/api/update-score',{
-            method:'PUT',
-            headers:{'Content-Type':'application/json'},
-            body:JSON.stringify({id, score})
-        });
+async function loadStudents() {
+  const res = await fetch('/api/get-all-results');
+  allStudents = await res.json();
+  document.getElementById('totalCount').textContent = allStudents.length;
+  renderTable(allStudents);
+}
+
+function renderTable(data) {
+  const tbody = document.getElementById('studentTable');
+  if (!data.length) {
+    tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;padding:40px;color:var(--text-dim);">No results found</td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = data.map(s => {
+    const pct = Math.round(s.score / Math.max(s.total,1) * 100);
+    const badge = pct>=75?'badge-green':pct>=50?'badge-orange':'badge-red';
+    return `<tr>
+      <td><input type="checkbox" value="${s.id}"></td>
+      <td style="font-family:var(--mono);font-size:0.8rem;color:var(--text-muted);">${s.student_id || '—'}</td>
+      <td><strong>${s.student_name}</strong></td>
+      <td>${s.subject}</td>
+      <td style="font-size:0.8rem;color:var(--text-muted);">${new Date(s.exam_date).toLocaleDateString()}</td>
+      <td><input type="number" class="score-input" id="score-${s.id}" value="${s.score}" min="0" max="${s.total}">/<span style="font-family:var(--mono);font-size:0.82rem;">${s.total}</span></td>
+      <td><span class="badge ${badge}">${pct}%</span></td>
+    </tr>`;
+  }).join('');
+}
+
+async function assignMarks() {
+  const selected = document.querySelectorAll('#studentTable input[type=checkbox]:checked');
+  if (!selected.length) { toast('Select at least one student', 'error'); return; }
+
+  let updated = 0;
+  for (const box of selected) {
+    const id = box.value;
+    const scoreEl = document.getElementById('score-' + id);
+    if (scoreEl) {
+      const res = await fetch('/api/update-score', {
+        method: 'PUT',
+        headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({ id, score: scoreEl.value })
+      });
+      const data = await res.json();
+      if (data.success) updated++;
     }
+  }
 
-    alert("Marks updated!");
-    loadStudents();
+  toast(`Updated ${updated} record(s)`);
+  document.getElementById('selectAll').checked = false;
+  loadStudents();
 }
 
 loadStudents();
-</script>
 
+</script>
 </body>
 </html>
