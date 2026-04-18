@@ -19,7 +19,7 @@ const db = mysql.createConnection({
 
 const ADMIN_SECRET_PIN = "1234";
 
-// --- LOGIN LOGIC ---
+//  LOGIN LOGIC 
 app.post('/api/login', (req, res) => {
     const { email, password, role, pin } = req.body;
     
@@ -43,22 +43,74 @@ app.post('/api/login', (req, res) => {
     });
 });
 
-// --- REGISTER ---
+//  REGISTER 
 app.post('/api/register', (req, res) => {
+
     const { name, sid, email, pass, role } = req.body;
 
-    const sql = "INSERT INTO users (fullname, student_id, email, password, role) VALUES (?, ?, ?, ?, ?)";
-    
-    db.query(sql, [name, sid, email, pass, role], (err) => {
-        if (err) {
-            console.error(err);
-            return res.status(500).json({ success: false, message: "Registration failed. ID or Email might exist." });
+    // STEP 1: ONLY FOR STUDENTS
+    if (role === 'student') {
+
+        const parts = sid.split('-');
+
+        // validate format
+        if (parts.length !== 3) {
+            return res.status(400).json({
+                success: false,
+                message: "Invalid ID format. Use 123-456-789"
+            });
         }
-        res.json({ success: true });
-    });
+
+        const lastThree = parts[2];
+
+        //STEP 2: CHECK UNIQUE LAST 3 DIGITS
+        const checkSql = `
+            SELECT id FROM users
+            WHERE role='student'
+            AND RIGHT(student_id,3)=?
+        `;
+
+        db.query(checkSql, [lastThree], (err, rows) => {
+
+            if (err) {
+                return res.status(500).json({ success: false });
+            }
+
+            if (rows.length > 0) {
+                return res.status(400).json({
+                    success: false,
+                    message: "Last 3 digits of Student ID must be unique"
+                });
+            }
+
+            // AFTER CHECK → INSERT
+            insertUser();
+        });
+
+        return;
+    }
+
+    // admin → direct insert
+    insertUser();
+
+
+    //  INSERT FUNCTION (PUT BELOW SAME ROUTE)
+    function insertUser() {
+        const sql = `
+            INSERT INTO users (fullname, student_id, email, password, role)
+            VALUES (?, ?, ?, ?, ?)
+        `;
+
+        db.query(sql, [name, sid, email, pass, role], (err) => {
+            if (err) {
+                return res.status(500).json({ success: false });
+            }
+            res.json({ success: true });
+        });
+    }
 });
 
-// --- SAVE QUESTIONS ---
+//  SAVE QUESTIONS 
 app.post('/api/questions', (req, res) => {
     const { subject, question_text, a, b, c, d, correct, type } = req.body;
 
@@ -72,6 +124,10 @@ app.post('/api/questions', (req, res) => {
         res.json({ success: true });
     });
 });
+
+
+
+// FIXED HERE ONLY
 
 app.get('/api/questions/:subject', (req, res) => {
     const sql = `
@@ -99,7 +155,7 @@ app.get('/api/questions/:subject', (req, res) => {
 });
 
 
-// --- GET EXAMS ---
+//  GET EXAMS 
 app.get('/api/get-exams', (req, res) => {
     const sql = "SELECT subject, COUNT(*) as qCount FROM questions GROUP BY subject";
     db.query(sql, (err, results) => {
@@ -111,7 +167,19 @@ app.get('/api/get-exams', (req, res) => {
     });
 });
 
-//  ADMIN STATS
+app.get('/api/get-questions', (req, res) => {
+    const subject = req.query.subject;
+
+    const sql = "SELECT * FROM questions WHERE subject = ?";
+    db.query(sql, [subject], (err, results) => {
+        if (err) return res.status(500).json([]);
+        res.json(results);
+    });
+});
+
+
+
+// ADMIN STATS
 
 app.get('/api/admin-stats', (req, res) => {
     const sql = `
@@ -130,16 +198,20 @@ app.get('/api/admin-stats', (req, res) => {
 });
 
 
-// --- GET ALL RESULTS ---
+//  GET ALL RESULTS 
 app.get('/api/get-all-results', (req, res) => {
-    const sql = "SELECT * FROM results ORDER BY exam_date DESC";
+    // We select exam_name and rename it to 'subject' for the frontend
+    const sql = "SELECT id, student_id, student_name, subject, score, total, exam_date FROM results ORDER BY id DESC";
     db.query(sql, (err, results) => {
-        if (err) return res.status(500).json([]);
+        if (err) {
+            console.error(err);
+            return res.status(500).json([]);
+        }
         res.json(results);
     });
 });
 
-// --- MY RESULTS ---
+//  MY RESULTS 
 app.get('/api/my-results/:identifier', (req, res) => {
     const id = req.params.identifier;
 
@@ -150,11 +222,15 @@ app.get('/api/my-results/:identifier', (req, res) => {
     });
 });
 
-// --- SAVE RESULT ---
+//  SAVE RESULT 
 app.post('/api/save-result', (req, res) => {
     const { student_name, student_id, score, total, subject } = req.body;
-
-    const sql = "INSERT INTO results (student_name, student_id, score, total, exam_date, subject) VALUES (?, ?, ?, ?, NOW(), ?)";
+    // We insert the 'subject' from frontend into the 'exam_name' column
+   const sql = `
+INSERT INTO results 
+(student_name, student_id, score, total, subject, exam_date) 
+VALUES (?, ?, ?, ?, ?, NOW())
+`;
     db.query(sql, [student_name, student_id, score, total, subject], (err) => {
         if (err) {
             console.error(err);
@@ -163,7 +239,8 @@ app.post('/api/save-result', (req, res) => {
         res.json({ success: true });
     });
 });
-// --- GET SCHEDULE ---
+
+// UPDATE SCORE
 
 app.put('/api/update-score', (req, res) => {
     const { id, score } = req.body;
@@ -180,8 +257,7 @@ app.put('/api/update-score', (req, res) => {
 });
 
 
-
-//  SAVE QUESTION WITH TIME + TIMER
+// SAVE QUESTION WITH TIME + TIMER
 app.post('/api/questions-full', (req, res) => {
 
     const {
@@ -225,6 +301,8 @@ app.post('/api/questions-full', (req, res) => {
     });
 });
 
+// GET QUESTIONS BY SUBJECT (for manage page)
+
 app.get('/api/get-questions', (req, res) => {
     const subject = req.query.subject;
 
@@ -244,6 +322,9 @@ app.get('/api/get-questions', (req, res) => {
     });
 });
 
+
+
+// DELETE QUESTION
 
 app.delete('/api/delete-question', (req, res) => {
     const { id } = req.body;
@@ -284,6 +365,8 @@ app.delete('/api/delete-exam', (req, res) => {
 
 
 
+// CREATE EXAM (DUMMY CREATE - OPTIONAL)
+
 app.post('/api/create-exam', (req, res) => {
     const { subject } = req.body;
 
@@ -302,6 +385,8 @@ app.post('/api/create-exam', (req, res) => {
         res.json({ success:true });
     });
 });
+
+// UPDATE QUESTION
 
 app.put('/api/update-question', (req, res) => {
     const { id, question_text, a, b, c, d, correct, type } = req.body;
@@ -327,7 +412,6 @@ app.put('/api/update-question', (req, res) => {
         res.json({ success:true });
     });
 });
-// ===== FINAL SCHEDULE FIX =====
 
 // GET schedule
 app.get('/api/get-schedule/:subject', (req, res) => {
@@ -362,6 +446,8 @@ app.post('/api/set-schedule', (req, res) => {
         res.json({ success:true });
     });
 });
+
+// QUESTION BANK - GET SUBJECTS
 
 app.get('/api/qb-subjects', (req, res) => {
 
@@ -401,6 +487,7 @@ app.get('/api/qb-questions', (req, res) => {
         res.json(results);
     });
 });
+
 // GET STUDENTS WITH PARTICIPATION
 
 app.get('/api/students', (req, res) => {
@@ -449,5 +536,91 @@ app.post('/api/assess-students', (req, res) => {
         res.json({ success: true });
     });
 });
+app.get('/api/get-schedule', (req, res) => {
+    const sql = "SELECT * FROM exam_schedule ORDER BY start_time DESC";
 
+    db.query(sql, (err, result) => {
+        if (err) return res.json([]);
+        res.json(result);
+    });
+});
+//  SAVE SCHEDULE 
+app.post('/api/save-schedule', (req, res) => {
+    const { subject, start_time, end_time, timer } = req.body;
+
+    const sql = `
+    INSERT INTO exam_schedule (subject, start_time, end_time, timer)
+    VALUES (?, ?, ?, ?)
+    ON DUPLICATE KEY UPDATE 
+        start_time = VALUES(start_time),
+        end_time = VALUES(end_time),
+        timer = VALUES(timer)
+    `;
+
+    db.query(sql, [subject, start_time, end_time, timer], (err) => {
+        if (err) return res.status(500).json({ success: false });
+        res.json({ success: true });
+    });
+});
+
+
+//  GET SCHEDULE 
+app.get('/api/get-schedule/:subject', (req, res) => {
+    const sql = "SELECT * FROM exam_schedule WHERE subject = ?";
+
+    db.query(sql, [req.params.subject], (err, results) => {
+        if (err) return res.status(500).json(null);
+        res.json(results[0] || null);
+    });
+});
+
+
+//ONLY SHOW EXPIRED EXAMS
+
+app.get('/api/practice-exams', (req, res) => {
+
+    const sql = `
+        SELECT q.subject, COUNT(*) as qCount
+        FROM questions q
+        INNER JOIN exam_schedule s ON q.subject = s.subject
+        WHERE NOW() > s.end_time
+        GROUP BY q.subject
+    `;
+
+    db.query(sql, (err, results) => {
+        if (err) return res.status(500).json([]);
+        res.json(results);
+    });
+});
+
+
+
+//PRACTICE QUESTIONS (INCLUDE TYPE)
+
+app.get('/api/practice-questions/:subject', (req, res) => {
+
+  const subject = req.params.subject;
+
+  const sql = `
+    SELECT 
+      question_text,
+      option_a,
+      option_b,
+      option_c,
+      option_d,
+      correct_option,
+      type
+    FROM questions
+    WHERE LOWER(subject) = LOWER(?)
+    ORDER BY id ASC
+  `;
+
+  db.query(sql, [subject], (err, results) => {
+    if (err) {
+      console.error(err);
+      return res.json([]);
+    }
+    res.json(results);
+  });
+});
 app.listen(3000, () => console.log("Server running on http://localhost:3000"));
